@@ -1,0 +1,106 @@
+@import './styles/theme-variables.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--theme-bg-gradient);
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Navigation loading animation */
+@keyframes navigation-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Ant Design overrides */
+.ant-layout {
+  min-height: 100vh;
+}
+
+/* Header background manejado por CSS Module (AppLayout.module.css) */
+
+/* Inspection section styles */
+.inspection-sector-card {
+  margin-bottom: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.inspection-sector-card .ant-card-head {
+  background-color: #f5f5f5;
+}
+
+.inspection-sector-card .ant-card-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.inspection-item {
+  padding: 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.inspection-item:last-child {
+  border-bottom: none;
+}
+
+/* Photo upload styles */
+.photo-upload-section {
+  margin-bottom: 24px;
+}
+
+.photo-upload-item {
+  margin-bottom: 16px;
+}
+
+/* Vehicle list styles */
+.vehicle-table .ant-table-cell {
+  vertical-align: middle;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ant-card {
+    margin: 8px;
+  }
+
+  .ant-steps {
+    overflow-x: auto;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

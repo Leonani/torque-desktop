@@ -1,0 +1,74 @@
+.container {
+  padding: 24px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.statusCard {
+  margin-bottom: 16px;
+}
+
+.activoCard {
+  background: color-mix(in srgb, #52c41a 10%, var(--theme-bg-elevated, #ffffff));
+  border-color: color-mix(in srgb, #52c41a 40%, var(--theme-border, #d9d9d9));
+}
+
+.pasivoCard {
+  background: color-mix(in srgb, #cf1322 8%, var(--theme-bg-elevated, #ffffff));
+  border-color: color-mix(in srgb, #cf1322 35%, var(--theme-border, #d9d9d9));
+}
+
+.netoCard {
+  background: color-mix(in srgb, #1890ff 10%, var(--theme-bg-elevated, #ffffff));
+  border-color: color-mix(in srgb, #1890ff 40%, var(--theme-border, #d9d9d9));
+}
+
+.historySection {
+  margin-top: 32px;
+}
+
+.exportSection {
+  margin-bottom: 16px;
+}
+
+.tagSuccess {
+  color: #52c41a;
+}
+
+.tagWarning {
+  color: #faad14;
+}
+
+.tagError {
+  color: #ff4d4f;
+}
+
+.totalRow {
+  font-weight: 600;
+}
+
+.differencePositive {
+  color: #52c41a;
+}
+
+.differenceNegative {
+  color: #cf1322;
+}
+
+/* ── Report Detail Table ── */
+
+.reportTable {
+  margin-top: 8px;
+}
+
+.tableTotalRow {
+  font-weight: 600;
+  border-top: 1px solid #d9d9d9;
+}
+
+.tableNetoRow {
+  font-weight: 700;
+  border-top: 2px solid #d9d9d9;
+}

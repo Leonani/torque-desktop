@@ -1,0 +1,38 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  margin-bottom: 16px;
+}
+
+.movementsCard {
+  margin-top: 24px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.loadingIcon {
+  font-size: 48px;
+}
+
+.marginTop16 {
+  margin-top: 16px;
+}

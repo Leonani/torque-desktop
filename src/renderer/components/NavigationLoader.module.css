@@ -1,0 +1,20 @@
+.navigationLoader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  height: 3px;
+  background: linear-gradient(90deg, #1890ff, #40a9ff, #1890ff);
+  background-size: 200% 100%;
+  animation: navigation-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes navigation-loading {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}

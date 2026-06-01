@@ -1,0 +1,165 @@
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from '@store/index';
+
+const THEME_STORAGE_KEY = 'torque_app_theme';
+
+/**
+ * Modos de tema soportados
+ */
+type ThemeMode = 'light' | 'dark';
+
+/**
+ * Estado del tema en Redux
+ */
+interface ThemeState {
+  mode: ThemeMode;
+  accentColor: string;
+  presetName: string | null;
+}
+
+/**
+ * Formato legacy del tema (puede existir en localStorage)
+ */
+interface LegacyTheme {
+  isDark?: boolean;
+  primaryColorHex?: string;
+  primaryColor?: string;
+  gradientStart?: string;
+  gradientEnd?: string;
+  headerColor?: string;
+  logo?: string;
+}
+
+const ACCENT_COLORS = {
+  azul: '#1677ff',
+  rojo: '#f5222d',
+  verde: '#52c41a',
+} as const;
+
+/**
+ * Migra el formato legacy de tema al nuevo formato
+ */
+function migrateLegacyTheme(legacy: LegacyTheme): ThemeState {
+  return {
+    mode: legacy.isDark ? 'dark' : 'light',
+    accentColor: legacy.primaryColorHex || legacy.primaryColor || ACCENT_COLORS.azul,
+    presetName: null,
+  };
+}
+
+/**
+ * Lee el tema del localStorage, intentando migrar el formato legacy si es necesario
+ */
+function loadThemeFromStorage(): ThemeState {
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (!saved) {
+      return getDefaultTheme();
+    }
+
+    const parsed = JSON.parse(saved);
+
+    // Detectar formato legacy (tiene isDark o primaryColor)
+    if ('isDark' in parsed || 'primaryColor' in parsed || 'primaryColorHex' in parsed) {
+      const migrated = migrateLegacyTheme(parsed as LegacyTheme);
+      saveThemeToStorage(migrated);
+      return migrated;
+    }
+
+    // Formato nuevo
+    if (parsed && typeof parsed === 'object' && 'mode' in parsed && 'accentColor' in parsed) {
+      return {
+        mode: parsed.mode || 'light',
+        accentColor: parsed.accentColor || ACCENT_COLORS.azul,
+        presetName: parsed.presetName || null,
+      };
+    }
+
+    return getDefaultTheme();
+  } catch {
+    return getDefaultTheme();
+  }
+}
+
+function getDefaultTheme(): ThemeState {
+  return {
+    mode: 'light',
+    accentColor: ACCENT_COLORS.azul,
+    presetName: 'azul',
+  };
+}
+
+function saveThemeToStorage(theme: ThemeState): void {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+  } catch (error) {
+    console.error('Error saving theme to localStorage:', error);
+  }
+}
+
+const initialState: ThemeState = loadThemeFromStorage();
+
+const themeSlice = createSlice({
+  name: 'theme',
+  initialState,
+  reducers: {
+    /** Establece el modo de tema (light/dark) */
+    setThemeMode(state, action: PayloadAction<ThemeMode>) {
+      state.mode = action.payload;
+      saveThemeToStorage(state);
+    },
+
+    /** Establece un color de acento personalizado (hex) */
+    setAccentColor(state, action: PayloadAction<string>) {
+      state.accentColor = action.payload;
+      state.presetName = null;
+      saveThemeToStorage(state);
+    },
+
+    /** Establece un color predefinido por nombre */
+    setPresetColor(state, action: PayloadAction<string | null>) {
+      const presetName = action.payload;
+      if (presetName && presetName in ACCENT_COLORS) {
+        state.accentColor = ACCENT_COLORS[presetName as keyof typeof ACCENT_COLORS];
+        state.presetName = presetName;
+      } else {
+        state.accentColor = ACCENT_COLORS.azul;
+        state.presetName = 'azul';
+      }
+      saveThemeToStorage(state);
+    },
+
+    /** Restablece el tema a los valores por defecto */
+    resetTheme(state) {
+      state.mode = 'light';
+      state.accentColor = ACCENT_COLORS.azul;
+      state.presetName = 'azul';
+      saveThemeToStorage(state);
+    },
+
+    /** Hidrata el tema desde localStorage (llamar al inicio de la app) */
+    hydrateThemeFromStorage(state) {
+      const stored = loadThemeFromStorage();
+      state.mode = stored.mode;
+      state.accentColor = stored.accentColor;
+      state.presetName = stored.presetName;
+    },
+  },
+});
+
+// Actions
+export const {
+  setThemeMode,
+  setAccentColor,
+  setPresetColor,
+  resetTheme,
+  hydrateThemeFromStorage,
+} = themeSlice.actions;
+
+// Selectors
+export const selectThemeMode = (state: RootState): ThemeMode => state.theme.mode;
+export const selectAccentColor = (state: RootState): string => state.theme.accentColor;
+export const selectPresetName = (state: RootState): string | null => state.theme.presetName;
+export const selectThemeConfig = (state: RootState): ThemeState => state.theme;
+
+export default themeSlice.reducer;

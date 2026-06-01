@@ -1,0 +1,92 @@
+:root {
+  /* Colores primarios */
+  --theme-primary: #1677ff;
+  --theme-primary-hover: #4096ff;
+  --theme-primary-active: #0958d9;
+  --theme-primary-text: #ffffff;
+
+  /* Fondos */
+  --theme-bg-default: #ffffff;
+  --theme-bg-container: #ffffff;
+  --theme-bg-elevated: #ffffff;
+  --theme-bg-header: rgba(255, 255, 255, 0.9);
+  --theme-bg-spotlight: rgba(0, 0, 0, 0.02);
+
+  /* Gradiente de fondo (se sobrescribe dinámicamente desde JS) */
+  --theme-bg-gradient: linear-gradient(155deg, #1677ff 0%, #1677ff 10%, #f5f5f5 100%);
+
+  /* Textos */
+  --theme-text-primary: rgba(0, 0, 0, 0.88);
+  --theme-text-secondary: rgba(0, 0, 0, 0.65);
+  --theme-text-disabled: rgba(0, 0, 0, 0.25);
+  --theme-text-inverse: #ffffff;
+
+  /* Bordes */
+  --theme-border: #d9d9d9;
+  --theme-border-secondary: #f0f0f0;
+
+  /* Header */
+  --theme-header-bg: #ffffff;
+  --theme-header-bg-gradient: linear-gradient(155deg, #b3b3b3 0%, #e6e6e6 40%, #ffffff 100%);
+  --theme-header-text: rgba(0, 0, 0, 0.88);
+}
+
+[data-theme='dark'] {
+  --theme-primary-text: #ffffff;
+  --theme-bg-default: #141414;
+  --theme-bg-container: #1f1f1f;
+  --theme-bg-elevated: #2a2a2a;
+  --theme-bg-header: rgba(20, 20, 20, 0.9);
+  --theme-bg-spotlight: rgba(255, 255, 255, 0.04);
+
+  /* Gradiente de fondo oscuro (se sobrescribe dinámicamente desde JS) */
+  --theme-bg-gradient: linear-gradient(155deg, #1677ff 0%, #1677ff 10%, #141414 100%);
+
+  --theme-text-primary: rgba(255, 255, 255, 0.85);
+  --theme-text-secondary: rgba(255, 255, 255, 0.65);
+  --theme-text-disabled: rgba(255, 255, 255, 0.3);
+  --theme-text-inverse: #ffffff;
+  --theme-border: #303030;
+  --theme-border-secondary: #262626;
+  --theme-header-bg: #1f1f1f;
+  --theme-header-bg-gradient: linear-gradient(155deg, #0d0d0d 0%, #1a1a1a 40%, #1f1f1f 100%);
+  --theme-header-text: #ffffff;
+}
+
+/* Variable para tabs en AppLayout */
+:root {
+  --theme-tab-bg: rgba(255, 255, 255, 0.75);
+}
+[data-theme='dark'] {
+  --theme-tab-bg: rgba(255, 255, 255, 0.15);
+}
+
+/* Transición suave para cambios de tema */
+/* Aplicado a :root para que las variables CSS hereden transiciones suaves */
+:root {
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* Asegurar que elementos específicos de antd también transicionen */
+.ant-layout,
+.ant-layout-header,
+.ant-btn,
+.ant-card,
+.ant-modal,
+.ant-form,
+.ant-table,
+.ant-tabs,
+.ant-menu,
+.ant-dropdown,
+.ant-select,
+.ant-input,
+.ant-picker,
+.ant-message {
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}

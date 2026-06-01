@@ -1,0 +1,52 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tableCard {
+  margin-top: 16px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.title {
+  font-size: 18px;
+  color: white;
+  font-weight: bold;
+}
+
+.marginBottom24 {
+  margin-bottom: 24px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.marginBottom16 {
+  margin-bottom: 16px;
+}
+
+.modalBody {
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+
+.modalTop {
+  top: 16px;
+}
