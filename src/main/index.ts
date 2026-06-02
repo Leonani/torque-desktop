@@ -8,11 +8,21 @@ let mainWindow: BrowserWindow | null = null;
 
 const API_PORT = 3456;
 
-// Polyfill __dirname para que funcione tanto en CJS como en ESM.
-// En producción dentro del asar, import.meta.url se resuelve correctamente
-// gracias al soporte integrado de Electron para asar en fileURLToPath.
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// ── Polyfill global de __dirname / exports / module ─────────────────────────
+// Rollup tree-shakea las variables locales __dirname/__filename en ESM,
+// pero NO tree-shakea los assignments a globalThis (tienen side effects).
+// Las dependencias bundleadas (sql.js, express) usan __dirname como free
+// variable, y globalThis.__dirname es accesible desde la Global Environment.
+//
+// Ademas, sql.js bundleado hace `e.exports = u` donde `e` es el objeto module.
+// En CJS esto funciona porque module/exports son inyectados por Node, pero en
+// ESM no existen. Setear globalThis.exports y globalThis.module como polyfill
+// para que el codigo bundleado pueda accederlos como free variables.
+const __f = fileURLToPath(import.meta.url);
+globalThis.__filename = __f;
+globalThis.__dirname = path.dirname(__f);
+(globalThis as any).exports = {};
+(globalThis as any).module = { exports: (globalThis as any).exports };
 
 // ── Configuración de Auto-Updater ──────────────────────────────────────────
 autoUpdater.autoDownload = true;
@@ -30,7 +40,7 @@ async function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     webPreferences: {
-      preload: path.join(__dirname, '../preload/preload.js'),
+      preload: path.join(app.getAppPath(), 'dist/preload/preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -40,7 +50,7 @@ async function createWindow() {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    mainWindow.loadFile(path.join(app.getAppPath(), 'dist/renderer/index.html'));
   }
 }
 

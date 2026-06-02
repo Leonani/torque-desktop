@@ -1,6 +1,6 @@
 {
   "name": "torque-desktop",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "Torque - Sistema de gestión para taller mecánico",
   "author": "Leonel Escudero <leonani@outlook.com>",
   "main": "dist/main/index.js",
@@ -8,9 +8,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "electron:dev": "vite",
-    "electron:build": "vite build && electron-builder",
-    "electron:build:win": "vite build && electron-builder --win",
+    "postbuild": "node fix-sqljs.mjs",
+    "electron:build": "vite build && node fix-sqljs.mjs && electron-builder",
+    "electron:build:win": "vite build && node fix-sqljs.mjs && electron-builder --win",
     "postinstall": "electron-builder install-app-deps",
     "lint": "eslint ."
   },

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import electron from 'vite-plugin-electron'
 import renderer from 'vite-plugin-electron-renderer'
 import path from 'path'
+import { execSync } from 'child_process'
 
 export default defineConfig({
   plugins: [
@@ -10,11 +11,17 @@ export default defineConfig({
     electron([
       {
         entry: 'src/main/index.ts',
+        onstart() {
+          execSync('node fix-sqljs.mjs', { stdio: 'inherit' })
+        },
         vite: {
           build: {
             outDir: 'dist/main',
-            // __dirname se define mediante fileURLToPath(import.meta.url)
-            // en src/main/index.ts, compatible con ESM y asar.
+            rollupOptions: {
+              output: {
+                format: 'cjs',
+              },
+            },
           },
         },
       },
@@ -26,6 +33,11 @@ export default defineConfig({
         vite: {
           build: {
             outDir: 'dist/preload',
+            rollupOptions: {
+              output: {
+                format: 'cjs',
+              },
+            },
           },
         },
       },

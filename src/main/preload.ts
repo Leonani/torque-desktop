@@ -1,4 +1,9 @@
-import { contextBridge, ipcRenderer } from 'electron';
+// Usar require en lugar de import para evitar que Rollup genere
+// imports ESM, que no son compatibles con el sandbox de Electron.
+// El preload script siempre tiene acceso a require('electron') aunque
+// nodeIntegration esté deshabilitado.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { contextBridge, ipcRenderer } = require('electron');
 
 /** Status de actualización enviado desde el main process */
 interface UpdateStatus {

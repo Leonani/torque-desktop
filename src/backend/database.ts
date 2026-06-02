@@ -178,7 +178,7 @@ export async function initDatabase(): Promise<void> {
     // Configurar la ruta al WASM de sql.js
     // En desarrollo: está en node_modules/sql.js/dist/
     // En producción: se copia via extraResources a resources/sql.js/
-    const isDev = !!process.env.VITE_DEV_SERVER_URL;
+    const isDev = !app.isPackaged;
     const sqlWasmPath = isDev
       ? path.join(process.cwd(), 'node_modules', 'sql.js', 'dist')
       : path.join(process.resourcesPath, 'sql.js');
