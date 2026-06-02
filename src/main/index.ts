@@ -1,8 +1,18 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { autoUpdater } from 'electron-updater';
 import { startServer } from '../backend/index';
+
+// ── Debug Logger ────────────────────────────────────────────────────────────
+// Escribe logs a un archivo para depurar errores de producción
+const LOG_PATH = path.join(app.getPath('userData'), 'torque-debug.log');
+function debugLog(...args: any[]) {
+  const msg = `[${new Date().toISOString()}] ${args.map(a => typeof a === 'string' ? a : JSON.stringify(a)).join(' ')}`;
+  try { fs.appendFileSync(LOG_PATH, msg + '\n'); } catch {}
+  console.log(msg);
+}
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -34,24 +44,61 @@ async function createWindow() {
   // Start Express server
   await startServer(API_PORT);
 
+  const preloadPath = path.join(app.getAppPath(), 'dist/preload/preload.js');
+  const rendererPath = path.join(app.getAppPath(), 'dist/renderer/index.html');
+  const unpackedPreload = path.join(app.getAppPath() + '.unpacked', 'dist/preload/preload.js');
+  const resourcesPreload = path.join(process.resourcesPath, 'app.asar.unpacked', 'dist/preload/preload.js');
+
+  debugLog('=== APP START ===');
+  debugLog('app.isPackaged:', app.isPackaged);
+  debugLog('app.getAppPath():', app.getAppPath());
+  debugLog('process.resourcesPath:', process.resourcesPath);
+  debugLog('preload path:', preloadPath);
+  debugLog('unpacked preload:', unpackedPreload);
+  debugLog('resources preload:', resourcesPreload);
+  debugLog('renderer path:', rendererPath);
+  debugLog('preload exists?', fs.existsSync(preloadPath));
+  debugLog('unpacked preload exists?', fs.existsSync(unpackedPreload));
+  debugLog('resources preload exists?', fs.existsSync(resourcesPreload));
+  debugLog('renderer exists?', fs.existsSync(rendererPath));
+
+  const actualPreload = fs.existsSync(unpackedPreload) ? unpackedPreload :
+                         fs.existsSync(resourcesPreload) ? resourcesPreload :
+                         preloadPath;
+
+  debugLog('using preload:', actualPreload);
+
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
     minWidth: 1024,
     minHeight: 700,
     webPreferences: {
-      preload: path.join(app.getAppPath(), 'dist/preload/preload.js'),
+      preload: actualPreload,
       contextIsolation: true,
       nodeIntegration: false,
     },
   });
 
+  // Capturar errores de carga en la ventana
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
+    debugLog('did-fail-load:', { errorCode, errorDescription, validatedURL });
+  });
+
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-    mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(app.getAppPath(), 'dist/renderer/index.html'));
+    debugLog('Loading file:', rendererPath);
+    (mainWindow as any).loadFile(rendererPath).catch((err: any) => {
+      debugLog('loadFile ERROR:', err?.message || err);
+    });
+    // También probar con loadURL como fallback
+    const fileURL = 'file://' + rendererPath.replace(/\\/g, '/');
+    debugLog('Fallback fileURL:', fileURL);
   }
+
+  // Siempre abrir DevTools para debugging
+  mainWindow.webContents.openDevTools();
 }
 
 // ── Eventos de Auto-Updater ────────────────────────────────────────────────
