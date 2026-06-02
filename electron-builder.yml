@@ -14,7 +14,6 @@ files:
 asar: true
 asarUnpack:
   - "**/*.node"
-  - "node_modules/sql.js/**/*.wasm"
 
 win:
   target:
@@ -43,6 +42,11 @@ extraResources:
     to: resources/
     filter:
       - "**/*"
+  # sql.js WASM: necesario para la base de datos en producción
+  - from: node_modules/sql.js/dist/
+    to: sql.js/
+    filter:
+      - "*.wasm"
 
 nodeGypRebuild: false
 npmRebuild: true

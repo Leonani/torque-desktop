@@ -14,7 +14,8 @@ export default defineConfig({
           build: {
             outDir: 'dist/main',
             rollupOptions: {
-              external: ['sql.js', 'express'],
+              // express y sql.js se bundlean directamente para que funcionen
+              // en la app instalada (sin node_modules)
             },
           },
         },
