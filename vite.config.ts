@@ -13,13 +13,8 @@ export default defineConfig({
         vite: {
           build: {
             outDir: 'dist/main',
-            // CommonJS para que __dirname funcione en producción
-            // (ESM no tiene __dirname, y dentro de app.asar import.meta.url falla)
-            rollupOptions: {
-              output: {
-                format: 'cjs',
-              },
-            },
+            // __dirname se define mediante fileURLToPath(import.meta.url)
+            // en src/main/index.ts, compatible con ESM y asar.
           },
         },
       },

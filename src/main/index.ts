@@ -1,11 +1,18 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { autoUpdater } from 'electron-updater';
 import { startServer } from '../backend/index';
 
 let mainWindow: BrowserWindow | null = null;
 
 const API_PORT = 3456;
+
+// Polyfill __dirname para que funcione tanto en CJS como en ESM.
+// En producción dentro del asar, import.meta.url se resuelve correctamente
+// gracias al soporte integrado de Electron para asar en fileURLToPath.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ── Configuración de Auto-Updater ──────────────────────────────────────────
 autoUpdater.autoDownload = true;
@@ -23,7 +30,7 @@ async function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
