@@ -89,16 +89,19 @@ async function createWindow() {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
     debugLog('Loading file:', rendererPath);
-    (mainWindow as any).loadFile(rendererPath).catch((err: any) => {
-      debugLog('loadFile ERROR:', err?.message || err);
-    });
-    // También probar con loadURL como fallback
     const fileURL = 'file://' + rendererPath.replace(/\\/g, '/');
-    debugLog('Fallback fileURL:', fileURL);
+    mainWindow!.loadFile(rendererPath).catch((err: Error) => {
+      debugLog('loadFile ERROR, trying fallback URL:', err.message);
+      mainWindow!.loadURL(fileURL).catch((err2: Error) => {
+        debugLog('Fallback loadURL also failed:', err2.message);
+      });
+    });
   }
 
-  // Siempre abrir DevTools para debugging
-  mainWindow.webContents.openDevTools();
+  // Abrir DevTools solo en desarrollo
+  if (process.env.VITE_DEV_SERVER_URL) {
+    mainWindow.webContents.openDevTools();
+  }
 }
 
 // ── Eventos de Auto-Updater ────────────────────────────────────────────────
@@ -170,7 +173,9 @@ app.whenReady().then(async () => {
   if (!process.env.VITE_DEV_SERVER_URL) {
     // Esperar unos segundos para que la UI cargue primero
     setTimeout(() => {
-      autoUpdater.checkForUpdates();
+      autoUpdater.checkForUpdates().catch((err) => {
+        debugLog('checkForUpdates error:', err.message);
+      });
     }, 5000);
   }
 });
