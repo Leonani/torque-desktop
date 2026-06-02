@@ -13,9 +13,12 @@ export default defineConfig({
         vite: {
           build: {
             outDir: 'dist/main',
+            // CommonJS para que __dirname funcione en producción
+            // (ESM no tiene __dirname, y dentro de app.asar import.meta.url falla)
             rollupOptions: {
-              // express y sql.js se bundlean directamente para que funcionen
-              // en la app instalada (sin node_modules)
+              output: {
+                format: 'cjs',
+              },
             },
           },
         },

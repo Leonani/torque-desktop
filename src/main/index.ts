@@ -1,16 +1,11 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { autoUpdater } from 'electron-updater';
 import { startServer } from '../backend/index';
 
 let mainWindow: BrowserWindow | null = null;
 
 const API_PORT = 3456;
-
-// En ESM, __dirname no está disponible. Lo obtenemos de import.meta.url
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // ── Configuración de Auto-Updater ──────────────────────────────────────────
 autoUpdater.autoDownload = true;
