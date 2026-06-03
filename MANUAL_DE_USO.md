@@ -1,6 +1,6 @@
 # Manual de Uso — Torque Desktop
 
-**Versión:** 1.0.9  
+**Versión:** 1.1.0  
 **Sistema:** Windows (64 bits)  
 **Última actualización:** Junio 2026
 
