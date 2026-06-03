@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { app } from 'electron';
-import { initDatabase, getDatabase, closeDatabase } from './database';
+import { initDatabase, getDatabase, closeDatabase, persistDatabase } from './database';
 import vehicleRoutes from './routes/vehicles';
 import productRoutes from './routes/products';
 import stockRoutes from './routes/stock';
@@ -11,7 +11,7 @@ import ownerRoutes from './routes/owners';
 import appointmentRoutes from './routes/appointments';
 import categoryRoutes from './routes/categories';
 
-export { getDatabase, closeDatabase };
+export { getDatabase, closeDatabase, persistDatabase };
 
 /**
  * Inicia el servidor Express en el puerto especificado

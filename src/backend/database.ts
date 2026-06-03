@@ -167,6 +167,13 @@ function getDbPath(): string {
   return path.join(app.getPath('userData'), 'torque.db');
 }
 
+function getBackupPath(): string {
+  if (process.env.VITE_DEV_SERVER_URL) {
+    return path.join(process.cwd(), 'data', 'torque.db.backup');
+  }
+  return path.join(app.getPath('userData'), 'torque.db.backup');
+}
+
 /**
  * Inicializa la base de datos SQLite (async - requiere cargar WASM)
  * Crea el directorio, conecta, configura PRAGMAs y ejecuta el esquema
@@ -191,6 +198,19 @@ export async function initDatabase(): Promise<void> {
     // Asegurar que el directorio existe
     const dir = path.dirname(dbPath);
     fs.mkdirSync(dir, { recursive: true });
+
+    // Restaurar desde backup si la DB principal falta
+    if (!fs.existsSync(dbPath)) {
+      const backupPath = getBackupPath();
+      if (fs.existsSync(backupPath)) {
+        try {
+          fs.copyFileSync(backupPath, dbPath);
+          console.log('[Torque DB] Base de datos restaurada desde backup:', backupPath);
+        } catch (e) {
+          console.error('[Torque DB] Error al restaurar desde backup:', e);
+        }
+      }
+    }
 
     // Crear DB: leer archivo existente o crear uno nuevo
     let sqlJsDb: SqlJsDatabase;

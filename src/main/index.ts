@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { autoUpdater } from 'electron-updater';
-import { startServer } from '../backend/index';
+import { startServer, persistDatabase } from '../backend/index';
 
 // ── Debug Logger ────────────────────────────────────────────────────────────
 // Escribe logs a un archivo para depurar errores de producción
@@ -133,6 +133,17 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on('update-downloaded', (info) => {
+    // Persistir y respaldar la base de datos antes de instalar la actualización
+    try {
+      persistDatabase();
+      const dbPath = path.join(app.getPath('userData'), 'torque.db');
+      const backupPath = path.join(app.getPath('userData'), 'torque.db.backup');
+      fs.copyFileSync(dbPath, backupPath);
+      debugLog('Database backed up before update to:', backupPath);
+    } catch (e) {
+      debugLog('Failed to backup database before update:', e);
+    }
+
     mainWindow?.webContents.send('update-status', {
       type: 'downloaded',
       version: info.version,
@@ -177,6 +188,15 @@ app.whenReady().then(async () => {
         debugLog('checkForUpdates error:', err.message);
       });
     }, 5000);
+  }
+});
+
+app.on('before-quit', () => {
+  debugLog('App quitting, persisting database...');
+  try {
+    persistDatabase();
+  } catch (e) {
+    debugLog('Failed to persist database on quit:', e);
   }
 });
 

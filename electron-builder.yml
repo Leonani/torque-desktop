@@ -30,6 +30,8 @@ nsis:
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  guid: com.torque.desktop
   installerIcon: resources/icon.ico
   uninstallerIcon: resources/icon.ico
   createDesktopShortcut: true
