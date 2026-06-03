@@ -192,11 +192,18 @@ app.whenReady().then(async () => {
 });
 
 app.on('before-quit', () => {
-  debugLog('App quitting, persisting database...');
+  debugLog('App quitting, persisting and backing up database...');
   try {
     persistDatabase();
+    // Crear backup al cerrar para tener siempre un respaldo reciente
+    const dbPath = path.join(app.getPath('userData'), 'torque.db');
+    const backupPath = path.join(app.getPath('userData'), 'torque.db.backup');
+    if (fs.existsSync(dbPath)) {
+      fs.copyFileSync(dbPath, backupPath);
+      debugLog('Database backed up on quit to:', backupPath);
+    }
   } catch (e) {
-    debugLog('Failed to persist database on quit:', e);
+    debugLog('Failed to persist/backup database on quit:', e);
   }
 });
 

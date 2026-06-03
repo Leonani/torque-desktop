@@ -372,13 +372,19 @@ También podés descargar la última versión desde:
 
 La base de datos se almacena en:
 ```
-%APPDATA%/torque-desktop/data/
+%APPDATA%/torque-desktop/torque.db
 ```
+
+La aplicación también mantiene un backup automático de la base de datos en:
+```
+%APPDATA%/torque-desktop/torque.db.backup
+```
+Este backup se actualiza cada vez que la app se cierra o instala una actualización. Si `torque.db` falta al iniciar, se restaura automáticamente desde el backup.
 
 Si hay problemas con la base de datos:
 1. Cerrá la aplicación
-2. Respaldá la carpeta `data` 
-3. Borrá el contenido de `%APPDATA%/torque-desktop/data/`
+2. Respaldá los archivos `torque.db` y `torque.db.backup`
+3. Borrá los archivos `%APPDATA%/torque-desktop/torque.db` y `%APPDATA%/torque-desktop/torque.db.backup`
 4. Reiniciá la app (se crea una base de datos nueva)
 
 ### No se ven las actualizaciones
