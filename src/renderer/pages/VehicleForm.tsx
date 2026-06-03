@@ -1069,7 +1069,7 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
               justifyContent: 'space-between',
               position: isModal ? 'sticky' : 'static',
               bottom: isModal ? 0 : undefined,
-              background: isModal ? '#fff' : undefined,
+              background: isModal ? 'var(--theme-bg-elevated)' : undefined,
               padding: isModal ? '12px 0' : undefined,
               zIndex: isModal ? 1 : undefined,
             }}
