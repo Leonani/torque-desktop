@@ -548,6 +548,7 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
         // Editar: solo actualizar datos maestros (fotos/inspecciones se editan por visita)
         const masterData: Record<string, unknown> = {
           ownerName: ownerName.trim(),
+          licensePlate: (allValues.licensePlate || '').toUpperCase(),
           brand: (allValues.brand || '').toUpperCase(),
           model: (allValues.model || '').toUpperCase(),
           year: allValues.year,
