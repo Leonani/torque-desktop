@@ -3,7 +3,7 @@ import type { SqlJsStatic, Database as SqlJsDatabase, SqlValue } from 'sql.js';
 import path from 'path';
 import fs from 'fs';
 import { app } from 'electron';
-import { initializeSchema } from './schema';
+import { initializeSchema, seedCategories } from './schema';
 
 // ============================================================================
 // Wrapper de compatibilidad: expone API similar a better-sqlite3 usando sql.js
@@ -210,6 +210,9 @@ export async function initDatabase(): Promise<void> {
 
     // Inicializar esquema
     initializeSchema(wrapper);
+
+    // Sembrar categorías por defecto
+    seedCategories(wrapper);
 
     // Persistir a disco inmediatamente después de crear el esquema
     wrapper.persist();

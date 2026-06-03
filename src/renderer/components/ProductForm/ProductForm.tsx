@@ -1,9 +1,30 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Form, Input, Button, Card, Row, Col, InputNumber, Select, message } from 'antd';
-import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES, ProductCategory } from '@/types';
+import {
+  Form,
+  Input,
+  Button,
+  Card,
+  Row,
+  Col,
+  InputNumber,
+  Select,
+  message,
+  Divider,
+  Modal,
+  Space,
+  Typography,
+} from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { useAddProductMutation, useUpdateProductMutation, useGetProductByIdQuery } from '@/services/productApi';
+import {
+  useGetCategoriesQuery,
+  useAddCategoryMutation,
+  useAddSubcategoryMutation,
+} from '@/services/categoryApi';
 import styles from './ProductForm.module.css';
+
+const { Text } = Typography;
 
 /**
  * Props para el formulario de creación/edición de productos
@@ -43,6 +64,19 @@ const ProductForm: FC<ProductFormProps> = ({ isModal = false, onDone, productId 
   const [addProduct] = useAddProductMutation();
   const [updateProduct] = useUpdateProductMutation();
 
+  // RTK Query: Categorías dinámicas
+  const { data: categories = [], isLoading: categoriesLoading } = useGetCategoriesQuery();
+  const [addCategory] = useAddCategoryMutation();
+  const [addSubcategory] = useAddSubcategoryMutation();
+
+  // Estado para modales de agregar categoría/subcategoría
+  const [newCategoryModalOpen, setNewCategoryModalOpen] = useState(false);
+  const [newSubcategoryModalOpen, setNewSubcategoryModalOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newSubcategoryName, setNewSubcategoryName] = useState('');
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [addingSubcategory, setAddingSubcategory] = useState(false);
+
   useEffect(() => {
     const state = location.state as { codigoBarra?: string } | null;
     if (state?.codigoBarra) {
@@ -57,7 +91,14 @@ const ProductForm: FC<ProductFormProps> = ({ isModal = false, onDone, productId 
     }
   }, [productData, form]);
 
-  const handleCategoryChange = (value: ProductCategory | null) => {
+  // Obtener subcategorías de la categoría seleccionada
+  const selectedCategoryData = categories.find(cat => cat.name === selectedCategory);
+  const subcategoryOptions = selectedCategoryData?.subcategories.map(sub => ({
+    value: sub.name,
+    label: sub.name,
+  })) || [];
+
+  const handleCategoryChange = (value: string | null) => {
     form.setFieldValue('categoria', value);
     form.setFieldValue('subcategoria', null);
   };
@@ -72,12 +113,107 @@ const ProductForm: FC<ProductFormProps> = ({ isModal = false, onDone, productId 
         await addProduct(values).unwrap();
         messageApi.success('Producto creado');
       }
-      navigate('/products');
+      if (!isModal) {
+        navigate('/products');
+      }
       onDone?.();
     } catch {
       messageApi.error('Error guardando producto');
     }
   };
+
+  // ── Handlers para agregar categoría ────────────────────────────────────────
+  const handleOpenNewCategory = () => {
+    setNewCategoryName('');
+    setNewCategoryModalOpen(true);
+  };
+
+  const handleAddCategory = async () => {
+    const name = newCategoryName.trim();
+    if (!name) {
+      messageApi.warning('Ingrese un nombre para la categoría');
+      return;
+    }
+    setAddingCategory(true);
+    try {
+      await addCategory({ name }).unwrap();
+      messageApi.success(`Categoría "${name}" creada`);
+      setNewCategoryModalOpen(false);
+      setNewCategoryName('');
+      form.setFieldValue('categoria', name);
+      form.setFieldValue('subcategoria', null);
+    } catch (err: any) {
+      messageApi.error(err?.data?.message || 'Error al crear categoría');
+    } finally {
+      setAddingCategory(false);
+    }
+  };
+
+  // ── Handlers para agregar subcategoría ─────────────────────────────────────
+  const handleOpenNewSubcategory = () => {
+    setNewSubcategoryName('');
+    setNewSubcategoryModalOpen(true);
+  };
+
+  const handleAddSubcategory = async () => {
+    const name = newSubcategoryName.trim();
+    if (!name) {
+      messageApi.warning('Ingrese un nombre para la subcategoría');
+      return;
+    }
+    if (!selectedCategoryData) {
+      messageApi.warning('Seleccione primero una categoría');
+      return;
+    }
+    setAddingSubcategory(true);
+    try {
+      await addSubcategory({ categoryId: selectedCategoryData._id, name }).unwrap();
+      messageApi.success(`Subcategoría "${name}" creada`);
+      setNewSubcategoryModalOpen(false);
+      setNewSubcategoryName('');
+      form.setFieldValue('subcategoria', name);
+    } catch (err: any) {
+      messageApi.error(err?.data?.message || 'Error al crear subcategoría');
+    } finally {
+      setAddingSubcategory(false);
+    }
+  };
+
+  // ── Dropdown render personalizado para categoría ───────────────────────────
+  const categoryDropdownRender = (menu: React.ReactNode) => (
+    <div>
+      {menu}
+      <Divider style={{ margin: '4px 0' }} />
+      <Button
+        type="text"
+        icon={<PlusOutlined />}
+        onClick={handleOpenNewCategory}
+        className={styles.dropdownAddBtn}
+      >
+        Agregar nueva categoría
+      </Button>
+    </div>
+  );
+
+  // ── Dropdown render personalizado para subcategoría ────────────────────────
+  const subcategoryDropdownRender = (menu: React.ReactNode) => (
+    <div>
+      {menu}
+      {selectedCategory && (
+        <>
+          <Divider style={{ margin: '4px 0' }} />
+          <Button
+            type="text"
+            icon={<PlusOutlined />}
+            onClick={handleOpenNewSubcategory}
+            className={styles.dropdownAddBtn}
+          >
+            Agregar nueva subcategoría
+          </Button>
+        </>
+      )}
+    </div>
+  );
 
   return (
     <Card className={isModal ? styles.card : undefined}>
@@ -85,15 +221,15 @@ const ProductForm: FC<ProductFormProps> = ({ isModal = false, onDone, productId 
       <Form form={form} layout="vertical">
         <Row gutter={16}>
           <Col xs={24} md={12}>
-            <Form.Item 
-              name="nombreProducto" 
-              label="Nombre del Producto" 
+            <Form.Item
+              name="nombreProducto"
+              label="Nombre del Producto"
               rules={[
                 { required: true, message: 'El nombre del producto es obligatorio' },
                 { max: 100, message: 'El nombre no puede exceder 100 caracteres' }
               ]}
             >
-              <Input 
+              <Input
                 placeholder="Ingrese el nombre del producto"
                 maxLength={100}
                 showCount
@@ -112,8 +248,10 @@ const ProductForm: FC<ProductFormProps> = ({ isModal = false, onDone, productId 
               <Select
                 placeholder="Seleccionar categoría"
                 allowClear
+                loading={categoriesLoading}
                 onChange={handleCategoryChange}
-                options={Object.values(PRODUCT_CATEGORIES).map(cat => ({ value: cat, label: cat }))}
+                dropdownRender={categoryDropdownRender}
+                options={categories.map(cat => ({ value: cat.name, label: cat.name }))}
               />
             </Form.Item>
           </Col>
@@ -123,7 +261,8 @@ const ProductForm: FC<ProductFormProps> = ({ isModal = false, onDone, productId 
                 placeholder="Seleccionar subcategoría"
                 allowClear
                 disabled={!selectedCategory}
-                options={(selectedCategory ? PRODUCT_SUBCATEGORIES[selectedCategory] || [] : []).map(sub => ({ value: sub, label: sub }))}
+                dropdownRender={subcategoryDropdownRender}
+                options={subcategoryOptions}
               />
             </Form.Item>
           </Col>
@@ -131,17 +270,17 @@ const ProductForm: FC<ProductFormProps> = ({ isModal = false, onDone, productId 
 
         <Row gutter={16}>
           <Col xs={24} md={8}>
-            <Form.Item name="cantidad" label="Cantidad" rules={[{ required: true }]}> 
+            <Form.Item name="cantidad" label="Cantidad" rules={[{ required: true }]}>
               <InputNumber min={0} className={styles.fullWidth} />
             </Form.Item>
           </Col>
           <Col xs={24} md={8}>
-            <Form.Item name="precioCompra" label="Precio Compra"> 
+            <Form.Item name="precioCompra" label="Precio Compra">
               <InputNumber min={0} className={styles.fullWidth} />
             </Form.Item>
           </Col>
           <Col xs={24} md={8}>
-            <Form.Item name="precioVenta" label="Precio Venta"> 
+            <Form.Item name="precioVenta" label="Precio Venta">
               <InputNumber min={0} className={styles.fullWidth} />
             </Form.Item>
           </Col>
@@ -155,6 +294,62 @@ const ProductForm: FC<ProductFormProps> = ({ isModal = false, onDone, productId 
           </Form.Item>
         </Row>
       </Form>
+
+      {/* Modal: Agregar nueva categoría */}
+      <Modal
+        title="Nueva categoría"
+        open={newCategoryModalOpen}
+        onCancel={() => setNewCategoryModalOpen(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setNewCategoryModalOpen(false)}>
+            Cancelar
+          </Button>,
+          <Button key="add" type="primary" loading={addingCategory} onClick={handleAddCategory}>
+            Agregar
+          </Button>,
+        ]}
+        destroyOnClose
+      >
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Text>Nombre de la nueva categoría:</Text>
+          <Input
+            placeholder="Ej: Lubricantes, Herramientas..."
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            onPressEnter={handleAddCategory}
+            autoFocus
+          />
+        </Space>
+      </Modal>
+
+      {/* Modal: Agregar nueva subcategoría */}
+      <Modal
+        title="Nueva subcategoría"
+        open={newSubcategoryModalOpen}
+        onCancel={() => setNewSubcategoryModalOpen(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setNewSubcategoryModalOpen(false)}>
+            Cancelar
+          </Button>,
+          <Button key="add" type="primary" loading={addingSubcategory} onClick={handleAddSubcategory}>
+            Agregar
+          </Button>,
+        ]}
+        destroyOnClose
+      >
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Text>
+            Nueva subcategoría para <strong>{selectedCategory}</strong>:
+          </Text>
+          <Input
+            placeholder="Ej: Aceite 20W50, Pastillas de freno..."
+            value={newSubcategoryName}
+            onChange={(e) => setNewSubcategoryName(e.target.value)}
+            onPressEnter={handleAddSubcategory}
+            autoFocus
+          />
+        </Space>
+      </Modal>
     </Card>
   );
 };

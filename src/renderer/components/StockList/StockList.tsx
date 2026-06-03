@@ -22,7 +22,7 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useGetProductsQuery, useDeleteProductMutation } from '@/services/productApi';
-import { PRODUCT_CATEGORIES, ProductCategory } from '@/types';
+import { useGetCategoriesQuery } from '@/services/categoryApi';
 import type { Product } from '@/types';
 import ProductForm from '@components/ProductForm/ProductForm';
 import styles from './StockList.module.css';
@@ -36,10 +36,11 @@ const { Text } = Typography;
 const StockList: FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<ProductCategory | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | undefined>(undefined);
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
 
+  const { data: categories = [] } = useGetCategoriesQuery();
   const { data: products = [], isLoading, error } = useGetProductsQuery({
     search,
     categoria: categoryFilter || undefined,
@@ -164,7 +165,7 @@ const StockList: FC = () => {
               className={styles.fullWidth}
               value={categoryFilter}
               onChange={setCategoryFilter}
-              options={Object.values(PRODUCT_CATEGORIES).map(cat => ({ value: cat, label: cat }))}
+              options={categories.map(cat => ({ value: cat.name, label: cat.name }))}
             />
           </Col>
         </Row>

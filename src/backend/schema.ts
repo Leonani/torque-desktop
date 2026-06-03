@@ -208,5 +208,60 @@ export function initializeSchema(db: { exec: (sql: string) => void }): void {
     CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date);
     CREATE INDEX IF NOT EXISTS idx_appointments_vehicle_id ON appointments(vehicle_id);
     CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
+
+    -- Categorías de productos
+    CREATE TABLE IF NOT EXISTS categories (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
+
+    -- Subcategorías de productos
+    CREATE TABLE IF NOT EXISTS subcategories (
+      id TEXT PRIMARY KEY,
+      category_id TEXT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(category_id, name)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_subcategories_category_id ON subcategories(category_id);
+  `);
+}
+
+/**
+ * Inserta las categorías y subcategorías por defecto si no existen
+ * Se ejecuta después de la creación del esquema
+ */
+export function seedCategories(db: { exec: (sql: string) => void }): void {
+  // Usar INSERT OR IGNORE para evitar duplicados en reinicios
+  db.exec(`
+    INSERT OR IGNORE INTO categories (id, name) VALUES ('cat_filtros', 'Filtros');
+    INSERT OR IGNORE INTO categories (id, name) VALUES ('cat_repuestos', 'Repuestos');
+    INSERT OR IGNORE INTO categories (id, name) VALUES ('cat_car_detail', 'Car Detail');
+    INSERT OR IGNORE INTO categories (id, name) VALUES ('cat_aceite', 'Aceite');
+
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_filtro_aire', 'cat_filtros', 'Filtro de aire');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_filtro_aceite', 'cat_filtros', 'Filtro de aceite');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_filtro_hab', 'cat_filtros', 'Filtro habitáculo');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_filtro_comb', 'cat_filtros', 'Filtro combustible');
+
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_embrague', 'cat_repuestos', 'Embrague');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_distribuciones', 'cat_repuestos', 'Distribuciones');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_bujias', 'cat_repuestos', 'Bujías');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_cable_bujias', 'cat_repuestos', 'Cable de bujías');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_tren_del', 'cat_repuestos', 'Tren delantero');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_tren_tras', 'cat_repuestos', 'Tren trasero');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_lamparas', 'cat_repuestos', 'Lámparas');
+
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_limpieza', 'cat_car_detail', 'Limpieza');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_finalizador', 'cat_car_detail', 'Finalizador');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_accesorios', 'cat_car_detail', 'Accesorios');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_perfumes', 'cat_car_detail', 'Perfumes');
+
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_sueltos', 'cat_aceite', 'Sueltos');
+    INSERT OR IGNORE INTO subcategories (id, category_id, name) VALUES ('sub_envasados', 'cat_aceite', 'Envasados');
   `);
 }

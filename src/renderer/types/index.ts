@@ -86,11 +86,20 @@ export const PRODUCT_SUBCATEGORIES: Record<string, string[]> = {
 
 export type ProductCategory = typeof PRODUCT_CATEGORIES[keyof typeof PRODUCT_CATEGORIES];
 
+/**
+ * Categoría con subcategorías, devuelta por el endpoint GET /api/categories
+ */
+export interface CategoryWithSubs {
+  _id: string;
+  name: string;
+  subcategories: { _id: string; name: string }[];
+}
+
 export interface Product {
   _id?: string;
   nombreProducto: string;
   codigoBarra?: string;
-  categoria?: ProductCategory | null;
+  categoria?: string | null;
   subcategoria?: string | null;
   cantidad: number;
   precioCompra: number;

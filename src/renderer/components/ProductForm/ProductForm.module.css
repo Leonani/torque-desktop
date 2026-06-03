@@ -5,3 +5,10 @@
 .fullWidth {
   width: 100%;
 }
+
+.dropdownAddBtn {
+  width: 100%;
+  text-align: left;
+  padding: 4px 12px;
+  height: 36px;
+}
