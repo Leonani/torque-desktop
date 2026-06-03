@@ -15,6 +15,8 @@ interface ThemeState {
   mode: ThemeMode;
   accentColor: string;
   presetName: string | null;
+  title: string;
+  logo: string | null;
 }
 
 /**
@@ -44,6 +46,8 @@ function migrateLegacyTheme(legacy: LegacyTheme): ThemeState {
     mode: legacy.isDark ? 'dark' : 'light',
     accentColor: legacy.primaryColorHex || legacy.primaryColor || ACCENT_COLORS.azul,
     presetName: null,
+    title: 'Torque Desktop',
+    logo: legacy.logo || null,
   };
 }
 
@@ -72,6 +76,8 @@ function loadThemeFromStorage(): ThemeState {
         mode: parsed.mode || 'light',
         accentColor: parsed.accentColor || ACCENT_COLORS.azul,
         presetName: parsed.presetName || null,
+        title: parsed.title || 'Torque Desktop',
+        logo: parsed.logo || null,
       };
     }
 
@@ -86,6 +92,8 @@ function getDefaultTheme(): ThemeState {
     mode: 'light',
     accentColor: ACCENT_COLORS.azul,
     presetName: 'azul',
+    title: 'Torque Desktop',
+    logo: null,
   };
 }
 
@@ -134,6 +142,8 @@ const themeSlice = createSlice({
       state.mode = 'light';
       state.accentColor = ACCENT_COLORS.azul;
       state.presetName = 'azul';
+      state.title = 'Torque Desktop';
+      state.logo = null;
       saveThemeToStorage(state);
     },
 
@@ -143,6 +153,20 @@ const themeSlice = createSlice({
       state.mode = stored.mode;
       state.accentColor = stored.accentColor;
       state.presetName = stored.presetName;
+      state.title = stored.title;
+      state.logo = stored.logo;
+    },
+
+    /** Establece el título personalizado del header */
+    setBrandTitle(state, action: PayloadAction<string>) {
+      state.title = action.payload;
+      saveThemeToStorage(state);
+    },
+
+    /** Establece el logo en base64 (null para quitarlo) */
+    setBrandLogo(state, action: PayloadAction<string | null>) {
+      state.logo = action.payload;
+      saveThemeToStorage(state);
     },
   },
 });
@@ -154,12 +178,16 @@ export const {
   setPresetColor,
   resetTheme,
   hydrateThemeFromStorage,
+  setBrandTitle,
+  setBrandLogo,
 } = themeSlice.actions;
 
 // Selectors
 export const selectThemeMode = (state: RootState): ThemeMode => state.theme.mode;
 export const selectAccentColor = (state: RootState): string => state.theme.accentColor;
 export const selectPresetName = (state: RootState): string | null => state.theme.presetName;
+export const selectBrandTitle = (state: RootState): string => state.theme.title;
+export const selectBrandLogo = (state: RootState): string | null => state.theme.logo;
 export const selectThemeConfig = (state: RootState): ThemeState => state.theme;
 
 export default themeSlice.reducer;

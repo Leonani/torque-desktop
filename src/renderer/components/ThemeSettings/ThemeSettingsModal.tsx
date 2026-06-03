@@ -1,5 +1,5 @@
-import { Modal, Button, Switch, ColorPicker, Divider, Typography } from 'antd';
-import { SunOutlined, MoonOutlined } from '@ant-design/icons';
+import { Modal, Button, Switch, ColorPicker, Divider, Typography, Input, Upload, message } from 'antd';
+import { SunOutlined, MoonOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useTheme } from '@/hooks/useTheme';
 import styles from './ThemeSettings.module.css';
 
@@ -33,10 +33,39 @@ export function ThemeSettingsModal({ open, onClose }: ThemeSettingsModalProps) {
     setAccentColor,
     setPresetColor,
     resetTheme,
+    title,
+    logo,
+    setBrandTitle,
+    setBrandLogo,
   } = useTheme();
 
   const handleReset = () => {
     resetTheme();
+  };
+
+  const handleLogoUpload = (file: File): boolean => {
+    if (file.size > 500 * 1024) {
+      message.error('El logo no debe superar los 500KB');
+      return false;
+    }
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      message.error('Solo se permiten imágenes PNG, JPG o WebP');
+      return false;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      setBrandLogo(dataUrl);
+      message.success('Logo actualizado correctamente');
+    };
+    reader.readAsDataURL(file);
+    return false;
+  };
+
+  const handleRemoveLogo = () => {
+    setBrandLogo(null);
+    message.success('Logo eliminado');
   };
 
   return (
@@ -112,6 +141,54 @@ export function ThemeSettingsModal({ open, onClose }: ThemeSettingsModalProps) {
           size="large"
           disabledAlpha
         />
+      </div>
+
+      <Divider className={styles.divider} />
+
+      {/* Título personalizado */}
+      <div className={styles.section}>
+        <span className={styles.sectionTitle}>Título del header</span>
+        <Input
+          value={title}
+          onChange={(e) => setBrandTitle(e.target.value)}
+          placeholder="Torque Desktop"
+          maxLength={60}
+          showCount
+          size="large"
+        />
+      </div>
+
+      <Divider className={styles.divider} />
+
+      {/* Logo personalizado */}
+      <div className={styles.section}>
+        <span className={styles.sectionTitle}>Logo</span>
+        <div className={styles.logoSection}>
+          {logo && (
+            <div className={styles.logoPreviewWrapper}>
+              <img src={logo} alt="Logo preview" className={styles.logoPreview} />
+              <Button
+                icon={<DeleteOutlined />}
+                danger
+                size="small"
+                onClick={handleRemoveLogo}
+                style={{ flexShrink: 0 }}
+              >
+                Eliminar logo
+              </Button>
+            </div>
+          )}
+          <Upload
+            accept="image/png,image/jpeg,image/webp"
+            showUploadList={false}
+            beforeUpload={handleLogoUpload}
+            disabled={!!logo}
+          >
+            <Button icon={<UploadOutlined />} disabled={!!logo}>
+              {logo ? 'Logo cargado' : 'Subir logo'}
+            </Button>
+          </Upload>
+        </div>
       </div>
 
       <Divider className={styles.divider} />

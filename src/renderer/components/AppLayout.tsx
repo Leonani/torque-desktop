@@ -5,6 +5,7 @@ import {
   SettingOutlined,
   ShopOutlined,
 } from '@ant-design/icons';
+import { useTheme } from '@/hooks/useTheme';
 import { ThemeToggle } from '@/components/ThemeSettings/ThemeToggle';
 import { ThemeSettingsModal } from '@/components/ThemeSettings/ThemeSettingsModal';
 import { UpdateBanner } from '@/components/UpdateBanner/UpdateBanner';
@@ -21,6 +22,7 @@ const AppLayout: React.FC<{
 }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { title, logo } = useTheme();
 
   const [settingsModal, setSettingsModal] = useState(false);
 
@@ -50,9 +52,17 @@ const AppLayout: React.FC<{
         <Header className={styles.header}>
           <div className={styles.headerLeft}>
             <div className={styles.brandSection}>
-              <ShopOutlined className={styles.brandLogoFallback} />
+              {logo ? (
+                <img
+                  src={logo}
+                  alt={title}
+                  className={styles.brandLogo}
+                />
+              ) : (
+                <ShopOutlined className={styles.brandLogoFallback} />
+              )}
               <h1 className={styles.brandTitle}>
-                Torque Desktop
+                {title}
               </h1>
             </div>
           </div>
