@@ -5,6 +5,7 @@ import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, PrinterOutlined, PlusO
 import { useAppDispatch, useAppSelector } from '@hooks/useAppDispatch';
 import { fetchVehicleById, deleteVehicle, clearSelectedVehicle, setSelectedVisit } from '@store/vehicleSlice';
 import InspectionSectorCard from '@components/InspectionSectorCard';
+import VehicleForm from '@pages/VehicleForm';
 import { WorkOrderPrint } from '@components/WorkOrderPrint/WorkOrderPrint';
 import { formatDate } from '@utils/helpers';
 import { createEmptyInspections } from '@utils/inspectionData';
@@ -77,6 +78,9 @@ const VehicleDetail: React.FC = () => {
   const [customPriceCompra, setCustomPriceCompra] = useState<number>(0);
   const [servicioNombre, setServicioNombre] = useState<string>('');
   const [servicioPrecio, setServicioPrecio] = useState<number>(0);
+
+  // ── Edit vehicle modal state ───────────────────────────────
+  const [editModal, setEditModal] = useState(false);
 
   // ── Print modal state ──────────────────────────────────────
   const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
@@ -637,7 +641,7 @@ const VehicleDetail: React.FC = () => {
             <Button
               type="primary"
               icon={<EditOutlined />}
-              onClick={() => navigate(`/vehicles/edit/${id}`)}
+              onClick={() => setEditModal(true)}
             >
               Editar
             </Button>
@@ -1092,6 +1096,29 @@ const VehicleDetail: React.FC = () => {
       {/* ════════════════════════════════════════════ */}
       {/* Modals */}
       {/* ════════════════════════════════════════════ */}
+
+      {/* ── Modal: Editar Vehículo ────────────────────────── */}
+      <Modal
+        title="Editar Vehículo"
+        open={editModal}
+        onCancel={() => setEditModal(false)}
+        footer={null}
+        width={1200}
+        centered
+        style={{ top: 16 }}
+        styles={{ body: { maxHeight: 'calc(100vh - 180px)', overflowY: 'auto', padding: 24 } }}
+        destroyOnHidden
+      >
+        <VehicleForm
+          isModal
+          vehicleId={id}
+          initialStep={2}
+          onDone={() => {
+            setEditModal(false);
+            if (id) dispatch(fetchVehicleById(id));
+          }}
+        />
+      </Modal>
 
       {/* ── Modal: Registrar Pago (multi-fila) ───────────── */}
       <Modal
