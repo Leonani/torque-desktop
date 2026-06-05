@@ -219,7 +219,8 @@ const vehicleSlice = createSlice({
           };
         }
         if (state.selectedVehicle?._id === updated._id) {
-          state.selectedVehicle = updated;
+          // Merge para preservar visits y otros campos que el backend no devuelve en PUT
+          state.selectedVehicle = { ...state.selectedVehicle, ...updated };
         }
       })
       // Delete
