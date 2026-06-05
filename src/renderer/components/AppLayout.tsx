@@ -8,6 +8,7 @@ import {
 import { useTheme } from '@/hooks/useTheme';
 import { ThemeToggle } from '@/components/ThemeSettings/ThemeToggle';
 import { ThemeSettingsModal } from '@/components/ThemeSettings/ThemeSettingsModal';
+import { WorkshopDataModal } from '@/components/ThemeSettings/WorkshopDataModal';
 import { UpdateBanner } from '@/components/UpdateBanner/UpdateBanner';
 import styles from './AppLayout.module.css';
 
@@ -25,6 +26,7 @@ const AppLayout: React.FC<{
   const { title, logo } = useTheme();
 
   const [settingsModal, setSettingsModal] = useState(false);
+  const [workshopModal, setWorkshopModal] = useState(false);
 
   const activeTab = location.pathname.startsWith('/products')
     ? 'products'
@@ -37,6 +39,13 @@ const AppLayout: React.FC<{
           : 'vehicles';
 
   const menuItems = [
+    {
+      key: 'workshop',
+      icon: <ShopOutlined />,
+      label: 'Datos del Taller',
+      onClick: () => setWorkshopModal(true),
+    },
+    { type: 'divider' as const },
     {
       key: 'settings',
       icon: <SettingOutlined />,
@@ -118,6 +127,12 @@ const AppLayout: React.FC<{
           </div>
         </Content>
       </Layout>
+
+      {/* Workshop Data Modal */}
+      <WorkshopDataModal
+        open={workshopModal}
+        onClose={() => setWorkshopModal(false)}
+      />
 
       {/* Theme Settings Modal */}
       <ThemeSettingsModal
