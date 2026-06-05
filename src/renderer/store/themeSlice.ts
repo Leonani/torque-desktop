@@ -17,6 +17,11 @@ interface ThemeState {
   presetName: string | null;
   title: string;
   logo: string | null;
+  // Datos del taller para la orden de trabajo
+  direccion: string;
+  telefono: string;
+  email: string;
+  ciudad: string;
 }
 
 /**
@@ -48,6 +53,10 @@ function migrateLegacyTheme(legacy: LegacyTheme): ThemeState {
     presetName: null,
     title: 'Torque Desktop',
     logo: legacy.logo || null,
+    direccion: '',
+    telefono: '',
+    email: '',
+    ciudad: '',
   };
 }
 
@@ -78,6 +87,10 @@ function loadThemeFromStorage(): ThemeState {
         presetName: parsed.presetName || null,
         title: parsed.title || 'Torque Desktop',
         logo: parsed.logo || null,
+        direccion: parsed.direccion || '',
+        telefono: parsed.telefono || '',
+        email: parsed.email || '',
+        ciudad: parsed.ciudad || '',
       };
     }
 
@@ -94,6 +107,10 @@ function getDefaultTheme(): ThemeState {
     presetName: 'azul',
     title: 'Torque Desktop',
     logo: null,
+    direccion: '',
+    telefono: '',
+    email: '',
+    ciudad: '',
   };
 }
 
@@ -144,6 +161,10 @@ const themeSlice = createSlice({
       state.presetName = 'azul';
       state.title = 'Torque Desktop';
       state.logo = null;
+      state.direccion = '';
+      state.telefono = '';
+      state.email = '';
+      state.ciudad = '';
       saveThemeToStorage(state);
     },
 
@@ -168,6 +189,44 @@ const themeSlice = createSlice({
       state.logo = action.payload;
       saveThemeToStorage(state);
     },
+
+    /** Establece la dirección del taller */
+    setTallerDireccion(state, action: PayloadAction<string>) {
+      state.direccion = action.payload;
+      saveThemeToStorage(state);
+    },
+
+    /** Establece el teléfono del taller */
+    setTallerTelefono(state, action: PayloadAction<string>) {
+      state.telefono = action.payload;
+      saveThemeToStorage(state);
+    },
+
+    /** Establece el email del taller */
+    setTallerEmail(state, action: PayloadAction<string>) {
+      state.email = action.payload;
+      saveThemeToStorage(state);
+    },
+
+    /** Establece la ciudad del taller */
+    setTallerCiudad(state, action: PayloadAction<string>) {
+      state.ciudad = action.payload;
+      saveThemeToStorage(state);
+    },
+
+    /** Establece todos los datos del taller de una vez */
+    setTallerSettings(state, action: PayloadAction<{
+      direccion: string;
+      telefono: string;
+      email: string;
+      ciudad: string;
+    }>) {
+      state.direccion = action.payload.direccion;
+      state.telefono = action.payload.telefono;
+      state.email = action.payload.email;
+      state.ciudad = action.payload.ciudad;
+      saveThemeToStorage(state);
+    },
   },
 });
 
@@ -180,6 +239,11 @@ export const {
   hydrateThemeFromStorage,
   setBrandTitle,
   setBrandLogo,
+  setTallerDireccion,
+  setTallerTelefono,
+  setTallerEmail,
+  setTallerCiudad,
+  setTallerSettings,
 } = themeSlice.actions;
 
 // Selectors
@@ -188,6 +252,10 @@ export const selectAccentColor = (state: RootState): string => state.theme.accen
 export const selectPresetName = (state: RootState): string | null => state.theme.presetName;
 export const selectBrandTitle = (state: RootState): string => state.theme.title;
 export const selectBrandLogo = (state: RootState): string | null => state.theme.logo;
+export const selectTallerDireccion = (state: RootState): string => state.theme.direccion;
+export const selectTallerTelefono = (state: RootState): string => state.theme.telefono;
+export const selectTallerEmail = (state: RootState): string => state.theme.email;
+export const selectTallerCiudad = (state: RootState): string => state.theme.ciudad;
 export const selectThemeConfig = (state: RootState): ThemeState => state.theme;
 
 export default themeSlice.reducer;

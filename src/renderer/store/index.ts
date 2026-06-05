@@ -4,6 +4,7 @@ import cashRegisterReducer from './cashRegisterSlice';
 import themeReducer from './themeSlice';
 import { productApi } from '@/services/productApi';
 import { categoryApi } from '@/services/categoryApi';
+import { workshopApi } from '@/services/workshopApi';
 
 export const store = configureStore({
   reducer: {
@@ -12,9 +13,10 @@ export const store = configureStore({
     theme: themeReducer,
     [productApi.reducerPath]: productApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,
+    [workshopApi.reducerPath]: workshopApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(productApi.middleware, categoryApi.middleware),
+    getDefaultMiddleware().concat(productApi.middleware, categoryApi.middleware, workshopApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -10,6 +10,7 @@ import cashRegisterRoutes from './routes/cashRegister';
 import ownerRoutes from './routes/owners';
 import appointmentRoutes from './routes/appointments';
 import categoryRoutes from './routes/categories';
+import workshopRoutes from './routes/workshop';
 
 export { getDatabase, closeDatabase, persistDatabase };
 
@@ -47,6 +48,7 @@ export async function startServer(port: number): Promise<number> {
     server.use('/api/owners', ownerRoutes);
     server.use('/api/appointments', appointmentRoutes);
     server.use('/api/categories', categoryRoutes);
+    server.use('/api/workshop', workshopRoutes);
 
     // Health check
     server.get('/api/health', (_req, res) => {

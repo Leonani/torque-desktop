@@ -1,0 +1,348 @@
+/* ════════════════════════════════════════════════════
+   WorkOrderPrint.module.css
+   Estilos para la orden de trabajo imprimible
+   ════════════════════════════════════════════════════ */
+
+/* ── Modal Footer ────────────────────────────────── */
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+/* ── Contenedor imprimible ────────────────────────── */
+.printable {
+  padding: 32px 40px;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  color: #1a1a1a;
+  background: #fff;
+}
+
+/* ── Header ───────────────────────────────────────── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.logo {
+  height: 64px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.tallerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tallerName {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+
+.tallerDetail {
+  font-size: 12px;
+  color: #555;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.headerRight {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.docTitle {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  color: #1a1a1a;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.docDate {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+/* ── Separador impreso ────────────────────────────── */
+.printDivider {
+  margin: 12px 0;
+  border-color: #333;
+}
+
+/* ── Secciones ────────────────────────────────────── */
+.section {
+  margin-bottom: 4px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #333;
+  margin: 0 0 10px 0;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #444;
+}
+
+.sectorBlock {
+  margin-bottom: 12px;
+}
+
+.sectorName {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: #444;
+}
+
+/* ── Grilla de información ────────────────────────── */
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 24px;
+}
+
+.infoItem {
+  display: flex;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.label {
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+  min-width: 100px;
+}
+
+.value {
+  color: #1a1a1a;
+}
+
+/* ── Tablas de datos ──────────────────────────────── */
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.dataTable th {
+  background: #f0f0f0;
+  font-weight: 700;
+  padding: 6px 10px;
+  text-align: left;
+  border: 1px solid #ccc;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.dataTable td {
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  vertical-align: top;
+}
+
+.dataTable tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* ── Estados de inspección ────────────────────────── */
+.statusOk {
+  display: inline-block;
+  background: #52c41a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 3px;
+}
+
+.statusRevision {
+  display: inline-block;
+  background: #faad14;
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 3px;
+}
+
+/* ── Totales ───────────────────────────────────────── */
+.totalRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 24px;
+  padding: 6px 10px;
+  font-size: 14px;
+  border-top: 2px solid #333;
+  margin-top: 4px;
+}
+
+/* ── Resumen ───────────────────────────────────────── */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 24px;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 0;
+  border-bottom: 1px dashed #ddd;
+}
+
+.summaryTotal {
+  font-size: 15px;
+  font-weight: 700;
+  border-bottom: 2px solid #333;
+  padding-top: 4px;
+  margin-top: 4px;
+}
+
+/* ── Notas ─────────────────────────────────────────── */
+.notasText {
+  font-size: 12px;
+  color: #444;
+  margin: 0;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* ── Firmas ────────────────────────────────────────── */
+.signatureSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin: 24px 0;
+}
+
+.signatureBlock {
+  text-align: center;
+}
+
+.signatureLine {
+  border-top: 1px solid #333;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.signatureLabel {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.signatureSub {
+  font-size: 11px;
+  color: #888;
+  margin: 2px 0 0 0;
+}
+
+/* ── Footer del documento ──────────────────────────── */
+.footer {
+  text-align: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #ccc;
+}
+
+.footer p {
+  font-size: 11px;
+  color: #888;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.footerSub {
+  font-size: 10px;
+  color: #aaa;
+}
+
+/* ════════════════════════════════════════════════════ */
+/* @media print: ocultar todo lo que no sea .printable */
+/* ════════════════════════════════════════════════════ */
+@media print {
+  /* Ocultar todo el chrome del modal */
+  body > *:not(.printable-wrapper) {
+    display: none !important;
+  }
+
+  /* Reset de márgenes de página */
+  @page {
+    size: A4;
+    margin: 15mm 15mm 20mm 15mm;
+  }
+
+  /* Ocultar elementos del modal de Ant Design */
+  :global(.ant-modal-mask),
+  :global(.ant-modal-wrap),
+  :global(.ant-modal-header),
+  :global(.ant-modal-footer) {
+    display: none !important;
+  }
+
+  /* Reset del contenedor modal */
+  :global(.ant-modal-content) {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  :global(.ant-modal-body) {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  /* Asegurar que el contenido imprimible se vea */
+  .printable {
+    padding: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Evitar saltos de página no deseados */
+  .section {
+    page-break-inside: avoid;
+  }
+
+  .dataTable {
+    page-break-inside: auto;
+  }
+
+  .dataTable tbody tr {
+    page-break-inside: avoid;
+  }
+
+  .signatureSection {
+    page-break-inside: avoid;
+  }
+
+  .header {
+    page-break-after: avoid;
+  }
+}

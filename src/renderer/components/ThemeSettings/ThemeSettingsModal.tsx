@@ -1,6 +1,7 @@
 import { Modal, Button, Switch, ColorPicker, Divider, Typography, Input, Upload, message } from 'antd';
-import { SunOutlined, MoonOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SunOutlined, MoonOutlined, UploadOutlined, DeleteOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined, BankOutlined } from '@ant-design/icons';
 import { useTheme } from '@/hooks/useTheme';
+import { useUpdateWorkshopMutation } from '@/services/workshopApi';
 import styles from './ThemeSettings.module.css';
 
 const { Text } = Typography;
@@ -37,7 +38,17 @@ export function ThemeSettingsModal({ open, onClose }: ThemeSettingsModalProps) {
     logo,
     setBrandTitle,
     setBrandLogo,
+    direccion,
+    telefono,
+    email,
+    ciudad,
+    setTallerDireccion,
+    setTallerTelefono,
+    setTallerEmail,
+    setTallerCiudad,
   } = useTheme();
+
+  const [updateWorkshop] = useUpdateWorkshopMutation();
 
   const handleReset = () => {
     resetTheme();
@@ -188,6 +199,59 @@ export function ThemeSettingsModal({ open, onClose }: ThemeSettingsModalProps) {
               {logo ? 'Logo cargado' : 'Subir logo'}
             </Button>
           </Upload>
+        </div>
+      </div>
+
+      <Divider className={styles.divider} />
+
+      {/* Datos del Taller */}
+      <div className={styles.section}>
+        <span className={styles.sectionTitle}>Datos del Taller</span>
+        <div className={styles.tallerFields}>
+          <Input
+            value={direccion}
+            onChange={(e) => {
+              setTallerDireccion(e.target.value);
+              updateWorkshop({ direccion: e.target.value });
+            }}
+            placeholder="Dirección del taller"
+            prefix={<EnvironmentOutlined />}
+            size="large"
+            maxLength={100}
+          />
+          <Input
+            value={telefono}
+            onChange={(e) => {
+              setTallerTelefono(e.target.value);
+              updateWorkshop({ telefono: e.target.value });
+            }}
+            placeholder="Teléfono"
+            prefix={<PhoneOutlined />}
+            size="large"
+            maxLength={30}
+          />
+          <Input
+            value={email}
+            onChange={(e) => {
+              setTallerEmail(e.target.value);
+              updateWorkshop({ email: e.target.value });
+            }}
+            placeholder="Email"
+            prefix={<MailOutlined />}
+            size="large"
+            maxLength={60}
+          />
+          <Input
+            value={ciudad}
+            onChange={(e) => {
+              setTallerCiudad(e.target.value);
+              updateWorkshop({ ciudad: e.target.value });
+            }}
+            placeholder="Ciudad"
+            prefix={<BankOutlined />}
+            size="large"
+            maxLength={50}
+          />
         </div>
       </div>
 

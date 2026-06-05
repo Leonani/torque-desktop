@@ -5,12 +5,21 @@ import {
   selectPresetName,
   selectBrandTitle,
   selectBrandLogo,
+  selectTallerDireccion,
+  selectTallerTelefono,
+  selectTallerEmail,
+  selectTallerCiudad,
   setThemeMode,
   setAccentColor,
   setPresetColor,
   resetTheme,
   setBrandTitle,
   setBrandLogo,
+  setTallerDireccion,
+  setTallerTelefono,
+  setTallerEmail,
+  setTallerCiudad,
+  setTallerSettings,
 } from '@/store/themeSlice';
 
 /**
@@ -24,6 +33,10 @@ export function useTheme() {
   const presetName = useAppSelector(selectPresetName);
   const title = useAppSelector(selectBrandTitle);
   const logo = useAppSelector(selectBrandLogo);
+  const direccion = useAppSelector(selectTallerDireccion);
+  const telefono = useAppSelector(selectTallerTelefono);
+  const email = useAppSelector(selectTallerEmail);
+  const ciudad = useAppSelector(selectTallerCiudad);
 
   return {
     mode,
@@ -31,6 +44,10 @@ export function useTheme() {
     presetName,
     title,
     logo,
+    direccion,
+    telefono,
+    email,
+    ciudad,
     isDark: mode === 'dark',
     toggleTheme: () => dispatch(setThemeMode(mode === 'dark' ? 'light' : 'dark')),
     setTheme: (newMode: 'light' | 'dark') => dispatch(setThemeMode(newMode)),
@@ -39,5 +56,11 @@ export function useTheme() {
     resetTheme: () => dispatch(resetTheme()),
     setBrandTitle: (t: string) => dispatch(setBrandTitle(t)),
     setBrandLogo: (logo: string | null) => dispatch(setBrandLogo(logo)),
+    setTallerDireccion: (d: string) => dispatch(setTallerDireccion(d)),
+    setTallerTelefono: (t: string) => dispatch(setTallerTelefono(t)),
+    setTallerEmail: (e: string) => dispatch(setTallerEmail(e)),
+    setTallerCiudad: (c: string) => dispatch(setTallerCiudad(c)),
+    setTallerSettings: (s: { direccion: string; telefono: string; email: string; ciudad: string }) =>
+      dispatch(setTallerSettings(s)),
   };
 }

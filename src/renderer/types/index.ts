@@ -283,6 +283,18 @@ export interface Owner {
  * @property {string} status
  */
 
+/**
+ * Configuración del taller para la orden de trabajo
+ */
+export interface TallerSettings {
+  nombre: string;
+  direccion: string;
+  telefono: string;
+  email: string;
+  ciudad: string;
+  logo: string | null;
+}
+
 export interface Appointment {
   _id?: string;
   vehicleId?: string | { _id: string };

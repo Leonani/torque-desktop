@@ -5,8 +5,9 @@ import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, PrinterOutlined, PlusO
 import { useAppDispatch, useAppSelector } from '@hooks/useAppDispatch';
 import { fetchVehicleById, deleteVehicle, clearSelectedVehicle, setSelectedVisit } from '@store/vehicleSlice';
 import InspectionSectorCard from '@components/InspectionSectorCard';
+import { WorkOrderPrint } from '@components/WorkOrderPrint/WorkOrderPrint';
 import { formatDate } from '@utils/helpers';
-import { sectorNames, createEmptyInspections } from '@utils/inspectionData';
+import { createEmptyInspections } from '@utils/inspectionData';
 import {
   registerPago, deletePago, createNotaCredito, deleteNotaCredito,
   assignProductToVisit, removeProductFromVisit, updateVisitServices,
@@ -77,6 +78,9 @@ const VehicleDetail: React.FC = () => {
   const [servicioNombre, setServicioNombre] = useState<string>('');
   const [servicioPrecio, setServicioPrecio] = useState<number>(0);
 
+  // ── Print modal state ──────────────────────────────────────
+  const [workOrderPrintOpen, setWorkOrderPrintOpen] = useState(false);
+
   useEffect(() => {
     // Verificar si la caja está abierta y obtener cierres cerrados
     const checkCashRegister = async () => {
@@ -132,95 +136,11 @@ const VehicleDetail: React.FC = () => {
   const handlePrint = () => {
     if (!selectedVehicle) return;
     const visit = selectedVisit || selectedVehicle.visits?.[selectedVehicle.visits.length - 1];
-    if (!visit) return;
-
-    const visitDate = visit.fechaIngreso ? formatDate(visit.fechaIngreso) : formatDate(selectedVehicle.createdAt || '');
-
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Orden de Trabajo - ${selectedVehicle.licensePlate}</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          h1 { text-align: center; color: #333; }
-          h2 { border-bottom: 2px solid #333; padding-bottom: 5px; margin-top: 20px; }
-          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-          .info-item { margin-bottom: 5px; }
-          .label { font-weight: bold; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f5f5f5; }
-          .photos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-          .photo { width: 100%; height: 120px; object-fit: cover; border: 1px solid #ddd; }
-          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
-          .signature { margin-top: 50px; display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
-          .sig-line { border-top: 1px solid #333; padding-top: 5px; text-align: center; }
-        </style>
-      </head>
-      <body>
-        <h1>Taller Mecánico</h1>
-        <h2>Datos del Vehículo</h2>
-        <div class="info-grid">
-          <div class="info-item"><span class="label">Patente:</span> ${selectedVehicle.licensePlate.toUpperCase()}</div>
-          <div class="info-item"><span class="label">Marca/Modelo:</span> ${selectedVehicle.brand} ${selectedVehicle.model}</div>
-          <div class="info-item"><span class="label">Año:</span> ${selectedVehicle.year}</div>
-          <div class="info-item"><span class="label">Color:</span> ${selectedVehicle.color || '-'}</div>
-          <div class="info-item"><span class="label">Dueño:</span> ${selectedVehicle.ownerName}</div>
-          <div class="info-item"><span class="label">Visita del:</span> ${visitDate}</div>
-        </div>
-        
-        <h2>Inspección</h2>
-        ${(() => {
-          const mergedInspections = mergeInspections(visit);
-          return mergedInspections.map((sector: { sector: string; items: Array<{ name: string; status?: string; notes?: string }> }) => `
-            <h3>${sectorNames[sector.sector as keyof typeof sectorNames] || sector.sector}</h3>
-            <table>
-              <tr><th>Item</th><th>Estado</th><th>Notas</th></tr>
-              ${sector.items.map((item: { name: string; status?: string; notes?: string }) => `
-                <tr>
-                  <td>${item.name}</td>
-                  <td>${item.status === 'revision' ? 'R' : 'OK'}</td>
-                  <td>${item.notes || '-'}</td>
-                </tr>
-              `).join('')}
-            </table>
-          `).join('');
-        })()}
-        
-        ${visit.productosAsignados && visit.productosAsignados.length > 0 ? `
-          <h2>Productos Asignados</h2>
-          <table>
-            <tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr>
-            ${visit.productosAsignados.map((p: { nombreProducto: string; cantidad: number; precioVenta: number; precioCompra?: number; subtotal: number }) => `
-              <tr>
-                <td>${p.nombreProducto}</td>
-                <td>${p.cantidad}</td>
-                <td>$${p.precioVenta}${p.precioCompra ? ` (Costo: $${p.precioCompra})` : ''}</td>
-                <td>$${p.subtotal}</td>
-              </tr>
-            `).join('')}
-          </table>
-        ` : ''}
-        
-        <div class="signature">
-          <div class="sig-line">Firma del Cliente</div>
-          <div class="sig-line">Firma del Taller</div>
-        </div>
-        
-        <div class="footer">
-          Documento generado el ${new Date().toLocaleDateString()} - Taller Mecánico
-        </div>
-      </body>
-      </html>
-    `;
-
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      printWindow.print();
+    if (!visit) {
+      message.warning('No hay una visita seleccionada para imprimir');
+      return;
     }
+    setWorkOrderPrintOpen(true);
   };
 
   const handleVisitChange = (key: string | string[]) => {
@@ -1512,6 +1432,26 @@ const VehicleDetail: React.FC = () => {
           )}
         </Spin>
       </Modal>
+
+      {/* ── Modal: Orden de Trabajo (Imprimir) ───────────── */}
+      {selectedVehicle && selectedVisit && (
+        <WorkOrderPrint
+          open={workOrderPrintOpen}
+          onClose={() => setWorkOrderPrintOpen(false)}
+          vehicle={selectedVehicle}
+          visit={selectedVisit}
+        />
+      )}
+
+      {/* ── Fallback: si hay vehículo pero no visita seleccionada ── */}
+      {selectedVehicle && !selectedVisit && selectedVehicle.visits && selectedVehicle.visits.length > 0 && (
+        <WorkOrderPrint
+          open={workOrderPrintOpen}
+          onClose={() => setWorkOrderPrintOpen(false)}
+          vehicle={selectedVehicle}
+          visit={selectedVehicle.visits[selectedVehicle.visits.length - 1]}
+        />
+      )}
     </div>
   );
 };

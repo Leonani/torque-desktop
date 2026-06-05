@@ -209,6 +209,12 @@ export function initializeSchema(db: { exec: (sql: string) => void }): void {
     CREATE INDEX IF NOT EXISTS idx_appointments_vehicle_id ON appointments(vehicle_id);
     CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
 
+    -- Configuración del taller (key-value para persistir datos del taller)
+    CREATE TABLE IF NOT EXISTS workshop_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
+
     -- Categorías de productos
     CREATE TABLE IF NOT EXISTS categories (
       id TEXT PRIMARY KEY,
