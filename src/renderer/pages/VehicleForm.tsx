@@ -1071,7 +1071,7 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
               position: isModal ? 'sticky' : 'static',
               bottom: isModal ? 0 : undefined,
               background: isModal ? 'var(--theme-bg-elevated)' : undefined,
-              padding: isModal ? '12px 0' : undefined,
+              padding: isModal ? '12px 24px' : '0 4px',
               zIndex: isModal ? 1 : undefined,
             }}
           >
