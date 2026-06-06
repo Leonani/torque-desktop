@@ -63,10 +63,6 @@ export function WorkOrderPrint({ open, onClose, vehicle, visit }: WorkOrderPrint
     if (!visit.notasCredito || visit.notasCredito.length === 0) return 0;
     return visit.notasCredito.reduce((sum, n) => sum + (n.monto || 0), 0);
   };
-  const calcularSaldo = (): number => {
-    return calcularTotal() - calcularPagado() + calcularDevuelto();
-  };
-
   // ── Print handler: establece el título del documento ────
   const handlePrint = () => {
     const originalTitle = document.title;
@@ -329,33 +325,6 @@ export function WorkOrderPrint({ open, onClose, vehicle, visit }: WorkOrderPrint
             <Divider className={styles.printDivider} />
           </>
         )}
-
-        {/* ── Saldo ────────────────────────────────────── */}
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Resumen</h3>
-          <div className={styles.summaryGrid}>
-            <div className={styles.summaryItem}>
-              <span>Total:</span>
-              <span>${calcularTotal().toLocaleString('es-AR')}</span>
-            </div>
-            <div className={styles.summaryItem}>
-              <span>Pagado:</span>
-              <span>${calcularPagado().toLocaleString('es-AR')}</span>
-            </div>
-            <div className={styles.summaryItem}>
-              <span>Devuelto:</span>
-              <span>-${calcularDevuelto().toLocaleString('es-AR')}</span>
-            </div>
-            <div className={`${styles.summaryItem} ${styles.summaryTotal}`}>
-              <span>Saldo:</span>
-              <span style={{ color: calcularSaldo() > 0 ? '#cf1322' : '#52c41a' }}>
-                ${calcularSaldo().toLocaleString('es-AR')}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <Divider className={styles.printDivider} />
 
         {/* ── Notas ──────────────────────────────────── */}
         {visit.notas && (

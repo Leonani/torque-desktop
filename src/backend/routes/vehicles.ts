@@ -542,11 +542,17 @@ router.put('/:id/visits/:visitId', (req: Request, res: Response) => {
     const now = new Date().toISOString();
 
     const updateVisit = db.transaction(() => {
+      // Usar COALESCE + ?? null para preservar valores existentes cuando
+      // el campo no se envía (undefined). sql.js NO acepta undefined
+      // como valor de binding, solo null | number | string | Uint8Array.
       db.prepare(`
         UPDATE visits
-        SET fecha_ingreso = ?, fecha_salida = ?, total = ?, notas = ?
+        SET fecha_ingreso = COALESCE(?, fecha_ingreso),
+            fecha_salida = COALESCE(?, fecha_salida),
+            total = COALESCE(?, total),
+            notas = COALESCE(?, notas)
         WHERE id = ?
-      `).run(fechaIngreso, fechaSalida || null, total || 0, notas || '', visitId);
+      `).run(fechaIngreso ?? null, fechaSalida ?? null, total ?? null, notas ?? null, visitId);
 
       // Actualizar servicios: reemplazar todos
       if (servicios !== undefined) {
