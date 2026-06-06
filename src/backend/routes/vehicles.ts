@@ -574,8 +574,9 @@ router.put('/:id/visits/:visitId', (req: Request, res: Response) => {
 
     res.redirect(303, `/api/vehicles/${id}`);
   } catch (error) {
-    console.error('Error al actualizar visita:', error);
-    res.status(500).json({ message: 'Error al actualizar visita' });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error al actualizar visita:', errorMessage, error);
+    res.status(500).json({ message: `Error al actualizar visita: ${errorMessage}` });
   }
 });
 
