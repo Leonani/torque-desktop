@@ -545,7 +545,7 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
       }
       
       if (isEditing && resolvedId) {
-        // Editar: solo actualizar datos maestros (fotos/inspecciones se editan por visita)
+        // Editar: actualizar datos maestros
         const masterData: Record<string, unknown> = {
           ownerName: ownerName.trim(),
           licensePlate: (allValues.licensePlate || '').toUpperCase(),
@@ -556,16 +556,50 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
         };
         await dispatch(updateVehicle({ id: resolvedId, data: masterData })).unwrap();
 
-        // Guardar servicios/mano de obra en la última visita
-        if (assignedServicios.length > 0) {
-          try {
-            const targetVisit = selectedVehicle?.visits?.[selectedVehicle.visits.length - 1];
-            if (targetVisit?._id) {
-              await updateVisitServices(resolvedId, targetVisit._id, assignedServicios);
+        const targetVisit = selectedVehicle?.visits?.[selectedVehicle.visits.length - 1];
+        const visitId = targetVisit?._id;
+
+        if (visitId) {
+          // Guardar fotos (solo las que fueron modificadas, detectadas por data: URI)
+          const photoPositions = ['front', 'back', 'left', 'right', 'motor', 'dashboard'] as const;
+          for (const position of photoPositions) {
+            const photoData = photos[position];
+            if (photoData && photoData.startsWith('data:')) {
+              try {
+                await api.post(`/vehicles/${resolvedId}/visits/${visitId}/photos`, { position, data: photoData });
+              } catch (err) {
+                console.error(`Error al guardar foto ${position}:`, err);
+              }
             }
-          } catch (err) {
-            console.error('Error al guardar servicios:', err);
-            message.warning('Servicios no pudieron ser guardados');
+          }
+
+          // Guardar inspecciones
+          if (inspections.length > 0) {
+            try {
+              const inspectionsPayload = inspections.map(sector => ({
+                sector: sector.sector,
+                items: sector.items.map(item => ({
+                  name: item.name,
+                  status: item.status,
+                  needsReplacement: item.needsReplacement ?? false,
+                  notes: item.notes || '',
+                })),
+              }));
+              await api.post(`/vehicles/${resolvedId}/visits/${visitId}/inspection`, { inspections: inspectionsPayload });
+            } catch (err) {
+              console.error('Error al guardar inspecciones:', err);
+              message.warning('Inspecciones no pudieron ser guardadas');
+            }
+          }
+
+          // Guardar servicios/mano de obra
+          if (assignedServicios.length > 0) {
+            try {
+              await updateVisitServices(resolvedId, visitId, assignedServicios);
+            } catch (err) {
+              console.error('Error al guardar servicios:', err);
+              message.warning('Servicios no pudieron ser guardados');
+            }
           }
         }
 
