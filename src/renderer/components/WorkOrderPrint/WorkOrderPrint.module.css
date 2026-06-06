@@ -283,26 +283,36 @@
 }
 
 /* ════════════════════════════════════════════════════ */
-/* @media print: ocultar todo lo que no sea .printable */
+/* @media print: mostrar solo .printable sin chrome   */
 /* ════════════════════════════════════════════════════ */
 @media print {
-  /* Ocultar todo el chrome del modal */
-  body > *:not(.printable-wrapper) {
-    display: none !important;
-  }
-
   /* Reset de márgenes de página */
   @page {
     size: A4;
     margin: 15mm 15mm 20mm 15mm;
   }
 
+  /* Ocultar la aplicación (renderizada en #root) —
+     el modal de Ant Design se renderiza en un portal
+     fuera de #root, así que el contenido imprimible
+     sigue siendo visible. */
+  :global(#root) {
+    display: none !important;
+  }
+
   /* Ocultar elementos del modal de Ant Design */
   :global(.ant-modal-mask),
-  :global(.ant-modal-wrap),
   :global(.ant-modal-header),
   :global(.ant-modal-footer) {
     display: none !important;
+  }
+
+  /* NO ocultar .ant-modal-wrap — necesita estar visible
+     para que su contenido (el .printable) se renderice.
+     Solo quitamos el fixed positioning. */
+  :global(.ant-modal-wrap) {
+    position: static !important;
+    overflow: visible !important;
   }
 
   /* Reset del contenedor modal */

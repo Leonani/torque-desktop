@@ -67,6 +67,26 @@ export function WorkOrderPrint({ open, onClose, vehicle, visit }: WorkOrderPrint
     return calcularTotal() - calcularPagado() + calcularDevuelto();
   };
 
+  // ── Print handler: establece el título del documento ────
+  const handlePrint = () => {
+    const originalTitle = document.title;
+    document.title = `Orden de Trabajo - ${vehicle.licensePlate.toUpperCase()}`;
+
+    const afterPrint = () => {
+      document.title = originalTitle;
+      window.removeEventListener('afterprint', afterPrint);
+    };
+
+    window.addEventListener('afterprint', afterPrint);
+    window.print();
+
+    // Fallback para navegadores que no disparan afterprint
+    setTimeout(() => {
+      document.title = originalTitle;
+      window.removeEventListener('afterprint', afterPrint);
+    }, 1000);
+  };
+
   return (
     <Modal
       title="Orden de Trabajo"
@@ -86,7 +106,7 @@ export function WorkOrderPrint({ open, onClose, vehicle, visit }: WorkOrderPrint
       footer={
         <div className={styles.modalFooter}>
           <Button onClick={onClose}>Cerrar</Button>
-          <Button type="primary" icon={<PrinterOutlined />} onClick={() => window.print()}>
+          <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrint}>
             Imprimir
           </Button>
         </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Form, Input, Button, Card, Typography, Steps, message, Row, Col, InputNumber, Select, Divider, Modal } from 'antd';
+import { Form, Input, Button, Card, Typography, Steps, message, Row, Col, InputNumber, Select, Divider, Modal, Alert } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeftOutlined, SaveOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, SaveOutlined, PlusOutlined, DeleteOutlined, WarningOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@hooks/useAppDispatch';
 import {
   createVehicle,
@@ -84,6 +84,8 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
   
   const formDataRef = useRef<Record<string, unknown>>({});
   const visitIdRef = useRef<string | undefined>(undefined);
+
+  const [cashOpen, setCashOpen] = useState<boolean | null>(null);
 
   const isEditing = !!resolvedId;
 
@@ -354,6 +356,20 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
       }
     };
     fetchData();
+  }, []);
+
+  // Verificar estado de la caja registradora
+  useEffect(() => {
+    const checkCashRegister = async () => {
+      try {
+        const res = await fetch('/api/cash-register/current');
+        const data = await res.json();
+        setCashOpen(data && data.estado === 'abierta');
+      } catch {
+        setCashOpen(false);
+      }
+    };
+    checkCashRegister();
   }, []);
 
   useEffect(() => {
@@ -1020,6 +1036,18 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
                   </Button>
                 </Col>
               </Row>
+
+              {/* Alerta de caja cerrada */}
+              {cashOpen === false && (
+                <Alert
+                  message="La caja está cerrada"
+                  description="Debe abrir la caja para poder registrar pagos o notas de crédito"
+                  type="warning"
+                  showIcon
+                  icon={<WarningOutlined />}
+                  style={{ marginBottom: 16 }}
+                />
+              )}
 
               {/* Grid unificado de Productos / Servicios */}
               {(assignedProducts.length > 0 || assignedServicios.length > 0) ? (

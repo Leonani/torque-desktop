@@ -13,6 +13,7 @@ import {
   Empty,
   Typography,
   Modal,
+  message,
 } from 'antd';
 import {
   PlusOutlined,
@@ -30,9 +31,11 @@ import {
   setFilters,
   clearFilters,
 } from '../store/vehicleSlice';
-import type { VehicleListItem } from '../types';
+import type { VehicleListItem, Vehicle, Visit } from '../types';
 import { formatDate } from '../utils/helpers';
 import VehicleForm from './VehicleForm';
+import api from '../services/api';
+import { WorkOrderPrint } from '../components/WorkOrderPrint/WorkOrderPrint';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -46,6 +49,9 @@ const VehicleList: React.FC = () => {
   const [models, setModels] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [printVehicle, setPrintVehicle] = useState<Vehicle | null>(null);
+  const [printVisit, setPrintVisit] = useState<Visit | null>(null);
 
   const loadFilterOptions = () => {
     const uniqueBrands = [...new Set(vehicles.map((v) => v.brand))];
@@ -163,40 +169,20 @@ const VehicleList: React.FC = () => {
     },
   ];
 
-  const handlePrintVehicle = (record: VehicleListItem) => {
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Orden de Trabajo - ${record.licensePlate}</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          h1 { text-align: center; color: #333; }
-          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-          .label { font-weight: bold; }
-          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
-        </style>
-      </head>
-      <body>
-        <h1>Orden de Trabajo</h1>
-        <div class="info-grid">
-          <div><span class="label">Patente:</span> ${record.licensePlate.toUpperCase()}</div>
-          <div><span class="label">Marca/Modelo:</span> ${record.brand} ${record.model}</div>
-          <div><span class="label">Año:</span> ${record.year}</div>
-          <div><span class="label">Color:</span> ${record.color || '-'}</div>
-          <div><span class="label">Dueño:</span> ${record.ownerName}</div>
-          <div><span class="label">Visitas:</span> ${record.visitCount}</div>
-          <div><span class="label">Último Ingreso:</span> ${formatDate(record.lastVisitDate || record.createdAt || '')}</div>
-        </div>
-        <div class="footer">Ver detalle completo en el sistema</div>
-      </body>
-      </html>
-    `;
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      printWindow.print();
+  const handlePrintVehicle = async (record: VehicleListItem) => {
+    try {
+      const response = await api.get(`/vehicles/${record._id}`);
+      const vehicle: Vehicle = response.data;
+      if (!vehicle.visits || vehicle.visits.length === 0) {
+        message.warning('El vehículo no tiene visitas registradas');
+        return;
+      }
+      const lastVisit = vehicle.visits[vehicle.visits.length - 1];
+      setPrintVehicle(vehicle);
+      setPrintVisit(lastVisit);
+      setPrintModalOpen(true);
+    } catch {
+      message.error('Error al cargar los datos del vehículo para imprimir');
     }
   };
 
@@ -302,6 +288,20 @@ const VehicleList: React.FC = () => {
       >
         <VehicleForm isModal vehicleId={editId} initialStep={editId ? 2 : 0} onDone={() => setModalOpen(false)} />
       </Modal>
+
+      {/* ── Modal: Orden de Trabajo (Imprimir) ───────────── */}
+      {printVehicle && printVisit && (
+        <WorkOrderPrint
+          open={printModalOpen}
+          onClose={() => {
+            setPrintModalOpen(false);
+            setPrintVehicle(null);
+            setPrintVisit(null);
+          }}
+          vehicle={printVehicle}
+          visit={printVisit}
+        />
+      )}
     </>
   );
 
