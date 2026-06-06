@@ -12,7 +12,8 @@
     "electron:build": "vite build && node fix-sqljs.mjs && electron-builder",
     "electron:build:win": "vite build && node fix-sqljs.mjs && electron-builder --win",
     "postinstall": "electron-builder install-app-deps",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "dev:api": "npx tsx src/backend/dev.ts"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",

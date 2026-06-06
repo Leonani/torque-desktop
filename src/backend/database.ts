@@ -2,8 +2,8 @@ import initSqlJs from 'sql.js';
 import type { SqlJsStatic, Database as SqlJsDatabase, SqlValue } from 'sql.js';
 import path from 'path';
 import fs from 'fs';
-import { app } from 'electron';
 import { initializeSchema, seedCategories } from './schema';
+import { getElectronApp } from './electron';
 
 // ============================================================================
 // Wrapper de compatibilidad: expone API similar a better-sqlite3 usando sql.js
@@ -164,14 +164,14 @@ function getDbPath(): string {
   if (process.env.VITE_DEV_SERVER_URL) {
     return path.join(process.cwd(), 'data', 'torque.db');
   }
-  return path.join(app.getPath('userData'), 'torque.db');
+  return path.join(getElectronApp().getPath('userData'), 'torque.db');
 }
 
 function getBackupPath(): string {
   if (process.env.VITE_DEV_SERVER_URL) {
     return path.join(process.cwd(), 'data', 'torque.db.backup');
   }
-  return path.join(app.getPath('userData'), 'torque.db.backup');
+  return path.join(getElectronApp().getPath('userData'), 'torque.db.backup');
 }
 
 /**
@@ -185,7 +185,7 @@ export async function initDatabase(): Promise<void> {
     // Configurar la ruta al WASM de sql.js
     // En desarrollo: está en node_modules/sql.js/dist/
     // En producción: se copia via extraResources a resources/sql.js/
-    const isDev = !app.isPackaged;
+    const isDev = !getElectronApp().isPackaged;
     const sqlWasmPath = isDev
       ? path.join(process.cwd(), 'node_modules', 'sql.js', 'dist')
       : path.join(process.resourcesPath, 'sql.js');

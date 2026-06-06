@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import { app } from 'electron';
 import { initDatabase, getDatabase, closeDatabase, persistDatabase } from './database';
 import vehicleRoutes from './routes/vehicles';
 import productRoutes from './routes/products';
@@ -11,6 +10,7 @@ import ownerRoutes from './routes/owners';
 import appointmentRoutes from './routes/appointments';
 import categoryRoutes from './routes/categories';
 import workshopRoutes from './routes/workshop';
+import { getElectronApp } from './electron';
 
 export { getDatabase, closeDatabase, persistDatabase };
 
@@ -36,7 +36,7 @@ export async function startServer(port: number): Promise<number> {
     if (process.env.VITE_DEV_SERVER_URL) {
       photosDir = path.join(process.cwd(), 'data', 'photos');
     } else {
-      photosDir = path.join(app.getPath('userData'), 'photos');
+      photosDir = path.join(getElectronApp().getPath('userData'), 'photos');
     }
     server.use('/photos', express.static(photosDir));
 
