@@ -83,6 +83,7 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
   const [isNewPlate, setIsNewPlate] = useState(false);
   
   const formDataRef = useRef<Record<string, unknown>>({});
+  const visitIdRef = useRef<string | undefined>(undefined);
 
   const isEditing = !!resolvedId;
 
@@ -391,6 +392,13 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
     }
   }, [lastVisit?.photos]);
 
+  // Guardar visitId en ref para tenerlo disponible siempre en handleSubmit
+  useEffect(() => {
+    if (lastVisit?._id) {
+      visitIdRef.current = lastVisit._id;
+    }
+  }, [lastVisit?._id]);
+
   useEffect(() => {
     if (lastVisit?.inspections) {
       if (lastVisit.inspections.length > 0) {
@@ -556,8 +564,7 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
         };
         await dispatch(updateVehicle({ id: resolvedId, data: masterData })).unwrap();
 
-        const targetVisit = selectedVehicle?.visits?.[selectedVehicle.visits.length - 1];
-        const visitId = targetVisit?._id;
+        const visitId = visitIdRef.current;
 
         if (visitId) {
           // Guardar fotos (solo las que fueron modificadas, detectadas por data: URI)
