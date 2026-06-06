@@ -235,7 +235,14 @@ router.get('/:id', (req: Request, res: Response) => {
 router.post('/', (req: Request, res: Response) => {
   try {
     const db = getDatabase();
-    const { ownerName, licensePlate, brand, model, year, color, visits: firstVisit } = req.body;
+    const {
+      ownerName, licensePlate, brand, model, year, color,
+      visits: firstVisit,
+      photos,
+      inspections,
+      productosAsignados,
+      servicios,
+    } = req.body;
 
     if (!ownerName || !licensePlate || !brand || !model || !year) {
       return res.status(400).json({ message: 'Faltan campos requeridos: ownerName, licensePlate, brand, model, year' });
@@ -243,6 +250,7 @@ router.post('/', (req: Request, res: Response) => {
 
     const vehicleId = randomUUID();
     const now = new Date().toISOString();
+    let createdVisitId: string | null = null;
 
     const insertVehicle = db.transaction(() => {
       db.prepare(`
@@ -250,35 +258,119 @@ router.post('/', (req: Request, res: Response) => {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(vehicleId, ownerName, licensePlate, brand, model, year, color || '', now, now);
 
-      // Si se incluye una primera visita, crearla
-      if (firstVisit && firstVisit.fechaIngreso) {
+      // Determinar si hay datos de visita (desde visits object o top-level)
+      const serviciosToProcess = firstVisit?.servicios || servicios || [];
+      const hasVisitData =
+        (firstVisit && firstVisit.fechaIngreso) ||
+        (Array.isArray(serviciosToProcess) && serviciosToProcess.length > 0) ||
+        (Array.isArray(productosAsignados) && productosAsignados.length > 0) ||
+        (Array.isArray(inspections) && inspections.length > 0) ||
+        (photos && typeof photos === 'object' && Object.values(photos).some(Boolean));
+
+      if (hasVisitData) {
         const visitId = randomUUID();
+        createdVisitId = visitId;
+
+        // Calcular total combinado de servicios + productos
+        const serviciosTotal = Array.isArray(serviciosToProcess)
+          ? serviciosToProcess.reduce((sum: number, s: any) => sum + (Number(s.precio) || 0), 0)
+          : 0;
+        const productosTotal = Array.isArray(productosAsignados)
+          ? productosAsignados.reduce((sum: number, p: any) => sum + (Number(p.subtotal) || 0), 0)
+          : 0;
+
         db.prepare(`
           INSERT INTO visits (id, vehicle_id, fecha_ingreso, fecha_salida, total, notas, created_at)
           VALUES (?, ?, ?, ?, ?, ?, ?)
         `).run(
           visitId,
           vehicleId,
-          firstVisit.fechaIngreso || now,
-          firstVisit.fechaSalida || null,
-          firstVisit.total || 0,
-          firstVisit.notas || '',
+          firstVisit?.fechaIngreso || now,
+          firstVisit?.fechaSalida || null,
+          serviciosTotal + productosTotal,
+          firstVisit?.notas || '',
           now
         );
 
-        // Si hay servicios en la primera visita
-        if (firstVisit.servicios && Array.isArray(firstVisit.servicios)) {
-          for (const svc of firstVisit.servicios) {
+        // ── Servicios ──
+        if (Array.isArray(serviciosToProcess)) {
+          for (const svc of serviciosToProcess) {
             db.prepare(`
               INSERT INTO visit_services (id, visit_id, nombre, precio)
               VALUES (?, ?, ?, ?)
             `).run(randomUUID(), visitId, svc.nombre, svc.precio);
           }
         }
+
+        // ── Productos asignados ──
+        if (Array.isArray(productosAsignados)) {
+          for (const prod of productosAsignados) {
+            db.prepare(`
+              INSERT INTO assigned_products (id, visit_id, product_id, nombre_producto, cantidad, precio_venta, precio_compra, subtotal)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+              randomUUID(),
+              visitId,
+              prod.productId,
+              prod.nombreProducto,
+              prod.cantidad,
+              prod.precioVenta,
+              prod.precioCompra || 0,
+              prod.subtotal
+            );
+          }
+        }
+
+        // ── Inspecciones ──
+        if (Array.isArray(inspections)) {
+          for (const sec of inspections) {
+            const sectorId = randomUUID();
+            db.prepare(`
+              INSERT INTO inspection_sectors (id, visit_id, sector)
+              VALUES (?, ?, ?)
+            `).run(sectorId, visitId, sec.sector);
+
+            if (Array.isArray(sec.items)) {
+              for (const item of sec.items) {
+                db.prepare(`
+                  INSERT INTO inspection_items (id, sector_id, name, status, needs_replacement, notes)
+                  VALUES (?, ?, ?, ?, ?, ?)
+                `).run(
+                  randomUUID(),
+                  sectorId,
+                  item.name,
+                  item.status || 'ok',
+                  item.needsReplacement ? 1 : 0,
+                  item.notes || ''
+                );
+              }
+            }
+          }
+        }
       }
     });
 
     insertVehicle();
+
+    // ── Fotos (después de la transacción: operación de filesystem) ──
+    if (createdVisitId && photos && typeof photos === 'object') {
+      const validPositions = ['front', 'back', 'left', 'right', 'motor', 'dashboard'];
+      for (const position of validPositions) {
+        const photoData = photos[position];
+        if (photoData && typeof photoData === 'string' && photoData.startsWith('data:')) {
+          try {
+            const filePath = savePhoto(photoData, vehicleId, createdVisitId, position);
+            db.prepare(`
+              INSERT INTO visit_photos (id, visit_id, position, file_path, created_at)
+              VALUES (?, ?, ?, ?, ?)
+            `).run(randomUUID(), createdVisitId, position, filePath, now);
+          } catch (err) {
+            console.error(`Error al guardar foto ${position}:`, err);
+          }
+        }
+      }
+      db.prepare('UPDATE vehicles SET updated_at = ? WHERE id = ?').run(now, vehicleId);
+    }
 
     // Devolver el vehículo creado con todos sus datos
     const vehicle = db.prepare(`
