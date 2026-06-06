@@ -542,17 +542,30 @@ router.put('/:id/visits/:visitId', (req: Request, res: Response) => {
     const now = new Date().toISOString();
 
     const updateVisit = db.transaction(() => {
-      // Usar COALESCE + ?? null para preservar valores existentes cuando
-      // el campo no se envía (undefined). sql.js NO acepta undefined
-      // como valor de binding, solo null | number | string | Uint8Array.
-      db.prepare(`
-        UPDATE visits
-        SET fecha_ingreso = COALESCE(?, fecha_ingreso),
-            fecha_salida = COALESCE(?, fecha_salida),
-            total = COALESCE(?, total),
-            notas = COALESCE(?, notas)
-        WHERE id = ?
-      `).run(fechaIngreso ?? null, fechaSalida ?? null, total ?? null, notas ?? null, visitId);
+      // Construir UPDATE dinámico: solo incluir campos que vienen en el body
+      const sets: string[] = [];
+      const params: unknown[] = [];
+
+      if (fechaIngreso !== undefined) {
+        sets.push('fecha_ingreso = ?');
+        params.push(fechaIngreso);
+      }
+      if (fechaSalida !== undefined) {
+        sets.push('fecha_salida = ?');
+        params.push(fechaSalida);
+      }
+      if (total !== undefined) {
+        sets.push('total = ?');
+        params.push(total);
+      }
+      if (notas !== undefined) {
+        sets.push('notas = ?');
+        params.push(notas);
+      }
+      if (sets.length > 0) {
+        const sql = `UPDATE visits SET ${sets.join(', ')} WHERE id = ?`;
+        db.prepare(sql).run(...params, visitId);
+      }
 
       // Actualizar servicios: reemplazar todos
       if (servicios !== undefined) {
@@ -572,10 +585,17 @@ router.put('/:id/visits/:visitId', (req: Request, res: Response) => {
 
     updateVisit();
 
+    // Devolver el vehículo completo actualizado
+    // Usamos redirect 303 para que el cliente haga GET del vehículo actualizado
     res.redirect(303, `/api/vehicles/${id}`);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('Error al actualizar visita:', errorMessage, error);
+    const errorStack = error instanceof Error ? error.stack : '';
+    console.error('=== ERROR al actualizar visita ===');
+    console.error('Error:', errorMessage);
+    console.error('Stack:', errorStack);
+    console.error('Body:', JSON.stringify(req.body));
+    console.error('Params:', req.params);
     res.status(500).json({ message: `Error al actualizar visita: ${errorMessage}` });
   }
 });
