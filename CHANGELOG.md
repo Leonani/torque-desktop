@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.7] - 2026-06-08
 
 ### Fixed
 - Preserve visits data when editing vehicles without existing visits (auto-creates visit on-the-fly)
@@ -50,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Split settings into Workshop Data and Appearance sections
 
+[1.2.7]: https://github.com/Leonani/torque-desktop/compare/v1.2.6...v1.2.7
 [1.2.6]: https://github.com/Leonani/torque-desktop/compare/v1.2.4...v1.2.6
 [1.2.4]: https://github.com/Leonani/torque-desktop/compare/v1.2.3...v1.2.4
 [1.2.3]: https://github.com/Leonani/torque-desktop/compare/v1.2.2...v1.2.3
