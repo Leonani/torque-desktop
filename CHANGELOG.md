@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- Preserve visits data when editing vehicles without existing visits (auto-creates visit on-the-fly)
+- Prevent overwriting dirty form fields when populating vehicle data
+- Synchronize service saving via Redux thunks instead of direct API calls
+- Migrate assign-product and remove-product endpoints to use proper visitId-based routes
+
+### Added
+- Testing infrastructure with Vitest 4.x + Playwright browser mode
+
 ## [1.2.6] - 2026-06-08
 
 ### Fixed
