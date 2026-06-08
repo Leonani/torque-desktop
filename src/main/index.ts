@@ -177,6 +177,12 @@ ipcMain.handle('restart-and-update', () => {
 
 // ── Arranque ────────────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
+  // Pasar explícitamente el userDataPath al backend antes de iniciar el servidor
+  // Esto asegura que la base de datos se guarde en la ruta correcta incluso si
+  // require('electron') falla en el contexto bundleado (ver src/backend/electron.ts)
+  (globalThis as any).__userDataPath = app.getPath('userData');
+  debugLog('userDataPath:', (globalThis as any).__userDataPath);
+
   await createWindow();
   setupAutoUpdater();
 
