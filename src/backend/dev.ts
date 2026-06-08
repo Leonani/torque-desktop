@@ -14,6 +14,10 @@ globalThis.__electron_dev = true;
 process.env.VITE_DEV_SERVER_URL = 'http://localhost:3005';
 
 import path from 'path';
+
+// Usar la misma estructura data/ que antes para la API standalone
+(globalThis as any).__userDataPath = path.join(process.cwd(), 'data');
+
 import { startServer } from './index';
 
 const PORT = 3456;

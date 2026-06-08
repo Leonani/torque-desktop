@@ -6,13 +6,7 @@ import { getElectronApp } from '../electron';
  * Obtiene el directorio base para almacenar fotos
  */
 function getPhotosDir(): string {
-  let photosDir: string;
-  if (process.env.VITE_DEV_SERVER_URL) {
-    photosDir = path.join(process.cwd(), 'data', 'photos');
-  } else {
-    photosDir = path.join(getElectronApp().getPath('userData'), 'photos');
-  }
-  return photosDir;
+  return path.join(getElectronApp().getPath('userData'), 'photos');
 }
 
 /**

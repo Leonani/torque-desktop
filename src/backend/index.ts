@@ -32,12 +32,7 @@ export async function startServer(port: number): Promise<number> {
     server.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
     // Servir fotos estáticamente
-    let photosDir: string;
-    if (process.env.VITE_DEV_SERVER_URL) {
-      photosDir = path.join(process.cwd(), 'data', 'photos');
-    } else {
-      photosDir = path.join(getElectronApp().getPath('userData'), 'photos');
-    }
+    const photosDir = path.join(getElectronApp().getPath('userData'), 'photos');
     server.use('/photos', express.static(photosDir));
 
     // Montar rutas de la API

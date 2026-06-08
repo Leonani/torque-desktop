@@ -161,16 +161,10 @@ let dbInstance: DatabaseWrapper | null = null;
 let initPromise: Promise<void> | null = null;
 
 function getDbPath(): string {
-  if (process.env.VITE_DEV_SERVER_URL) {
-    return path.join(process.cwd(), 'data', 'torque.db');
-  }
   return path.join(getElectronApp().getPath('userData'), 'torque.db');
 }
 
 function getBackupPath(): string {
-  if (process.env.VITE_DEV_SERVER_URL) {
-    return path.join(process.cwd(), 'data', 'torque.db.backup');
-  }
   return path.join(getElectronApp().getPath('userData'), 'torque.db.backup');
 }
 
