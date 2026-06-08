@@ -264,7 +264,7 @@ router.delete('/vehicles/:id/visits/:visitId/remove-product/:productId', (req: R
 });
 
 // ============================================================================
-// POST /api/stock/vehicles/:id/assign-product - Legacy: asignar a última visita
+// POST /api/stock/vehicles/:id/assign-product - [DEPRECATED] Usar /visits/:visitId/assign-product
 // ============================================================================
 router.post('/vehicles/:id/assign-product', (req: Request, res: Response) => {
   try {

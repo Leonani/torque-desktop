@@ -8,6 +8,8 @@ import {
   updateVehicle,
   fetchVehicleById,
   clearSelectedVehicle,
+  addVisit,
+  updateVisit,
 } from '@store/vehicleSlice';
 import type { Vehicle, Visit, InspectionSector, Product, ProductoAsignado, Owner, ServicioEntry } from '@/types';
 import PhotoUpload from '@components/PhotoUpload';
@@ -383,14 +385,27 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
 
   useEffect(() => {
     if (selectedVehicle && isEditing) {
-      form.setFieldsValue({
+      // Only set form fields if they differ from current form values
+      // (avoids overwriting dirty fields after updateVehicle.fulfilled)
+      const currentValues = form.getFieldsValue();
+      const vehicleData = {
         ownerName: selectedVehicle.ownerName,
         licensePlate: selectedVehicle.licensePlate,
         brand: selectedVehicle.brand,
         model: selectedVehicle.model,
         year: selectedVehicle.year,
         color: selectedVehicle.color || '',
-      });
+      };
+
+      // Check if form values differ from vehicle data
+      const hasChanges = Object.entries(vehicleData).some(
+        ([key, value]) => String(currentValues[key] ?? '') !== String(value ?? '')
+      );
+
+      if (hasChanges) {
+        form.setFieldsValue(vehicleData);
+      }
+
       setSelectedBrand(selectedVehicle.brand);
       // Get models for the editing vehicle's brand from local data
       setBrandModels(getModelsForBrand(selectedVehicle.brand));
@@ -580,7 +595,32 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
         };
         await dispatch(updateVehicle({ id: resolvedId, data: masterData })).unwrap();
 
-        const visitId = visitIdRef.current;
+        // Resolver visitId: usar existente o crear una nueva visita
+        let visitId = visitIdRef.current;
+
+        // ── Si el vehículo no tiene visitas, crear una ──
+        if (!visitId) {
+          try {
+            const now = new Date().toISOString();
+            const vehicleWithNewVisit = await dispatch(addVisit({
+              vehicleId: resolvedId,
+              visitData: {
+                fechaIngreso: now,
+              },
+            })).unwrap();
+            const newVisits = vehicleWithNewVisit.visits;
+            if (newVisits && newVisits.length > 0) {
+              visitId = newVisits[newVisits.length - 1]._id!;
+              visitIdRef.current = visitId;
+            } else {
+              throw new Error('No se pudo crear la visita');
+            }
+          } catch (err) {
+            console.error('Error al crear visita:', err);
+            message.error('Error al crear la visita. Los datos adicionales no se guardarán.');
+            // Al menos los datos maestros se guardaron
+          }
+        }
 
         if (visitId) {
           // Guardar fotos (solo las que fueron modificadas, detectadas por data: URI)
@@ -615,15 +655,24 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
             }
           }
 
-          // Guardar servicios/mano de obra
+          // Guardar servicios/mano de obra usando el thunk de Redux para mantener el estado sincronizado
           if (assignedServicios.length > 0) {
             try {
-              await updateVisitServices(resolvedId, visitId, assignedServicios);
+              await dispatch(updateVisit({
+                vehicleId: resolvedId,
+                visitId,
+                visitData: { servicios: assignedServicios },
+              })).unwrap();
             } catch (err) {
               console.error('Error al guardar servicios:', err);
               message.warning('Servicios no pudieron ser guardados');
             }
           }
+
+          // Guardar productos asignados (solo si hay productos pendientes)
+          // Products are saved individually via handleAssignProduct during editing,
+          // so we don't bulk-save them here to avoid duplicates.
+          // handleRemoveProduct now also calls the backend DELETE endpoint.
         }
 
         message.success('Vehículo actualizado exitosamente');
@@ -683,7 +732,12 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
       } else {
         // Vehículo existente: enviar al backend
         const vehicleIdValue = resolvedId || selectedVehicle?._id;
-        await api.post(`/stock/vehicles/${vehicleIdValue}/assign-product`, {
+        const targetVisitId = visitIdRef.current;
+        if (!targetVisitId) {
+          message.warning('Primero debe guardar el vehículo para crear una visita');
+          return;
+        }
+        await api.post(`/stock/vehicles/${vehicleIdValue}/visits/${targetVisitId}/assign-product`, {
           productId: selectedProductId,
           cantidad: selectedProductQty,
           precioVenta: precioVentaFinal !== product.precioVenta ? precioVentaFinal : undefined,
@@ -743,8 +797,25 @@ const [loadingOwnerVehicles, setLoadingOwnerVehicles] = useState(false);
   /**
    * Elimina un producto asignado de la lista local por índice
    */
-  const handleRemoveProduct = (index: number) => {
+  const handleRemoveProduct = async (index: number) => {
+    const productToRemove = assignedProducts[index];
+    
+    // Remove from local state immediately
     setAssignedProducts(prev => prev.filter((_, i) => i !== index));
+
+    // If editing and we have a vehicle+visit, remove from backend too
+    if (resolvedId && visitIdRef.current && productToRemove?.productId) {
+      try {
+        await api.delete(
+          `/stock/vehicles/${resolvedId}/visits/${visitIdRef.current}/remove-product/${productToRemove.productId}`
+        );
+      } catch (err) {
+        console.error('Error al remover producto del backend:', err);
+        message.error('Error al remover producto');
+        // Roll back local state on failure
+        setAssignedProducts(prev => [...prev.slice(0, index), productToRemove, ...prev.slice(index)]);
+      }
+    }
   };
 
   const steps = [

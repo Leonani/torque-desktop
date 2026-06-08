@@ -218,9 +218,15 @@ const vehicleSlice = createSlice({
             color: updated.color || '',
           };
         }
-        if (state.selectedVehicle?._id === updated._id) {
-          // Merge para preservar visits y otros campos que el backend no devuelve en PUT
-          state.selectedVehicle = { ...state.selectedVehicle, ...updated };
+        if (state.selectedVehicle?._id === updated._id && state.selectedVehicle) {
+          // Mutate in-place instead of creating new reference — prevents unnecessary re-renders
+          // that would trigger form effects and overwrite dirty form fields
+          state.selectedVehicle.ownerName = updated.ownerName;
+          state.selectedVehicle.licensePlate = updated.licensePlate;
+          state.selectedVehicle.brand = updated.brand;
+          state.selectedVehicle.model = updated.model;
+          state.selectedVehicle.year = updated.year;
+          state.selectedVehicle.color = updated.color || '';
         }
       })
       // Delete
