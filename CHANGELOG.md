@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-09
+
+### Fixed
+- Financial summary (Total/Pagado/Devuelto/Saldo) showing $0 after saving services — backend now recalculates `visits.total` inside the PUT transaction
+- Services being lost when adding multiple in one batch — `accumulatedServicios` local variable preserves pending services across iterations
+- sql.js build crash (`ReferenceError: $ is not defined`) in production bundle — `fix-sqljs.mjs` now guards `$n.exports` patterns
+
 ### Changed
 - Dev mode (`pnpm dev`) now uses the same database as the installed app (`userData/torque.db`) instead of `cwd()/data/torque.db`
 - Photos directory unified between dev and production modes
@@ -56,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Split settings into Workshop Data and Appearance sections
 
+[1.3.0]: https://github.com/Leonani/torque-desktop/compare/v1.2.7...v1.3.0
 [1.2.7]: https://github.com/Leonani/torque-desktop/compare/v1.2.6...v1.2.7
 [1.2.6]: https://github.com/Leonani/torque-desktop/compare/v1.2.4...v1.2.6
 [1.2.4]: https://github.com/Leonani/torque-desktop/compare/v1.2.3...v1.2.4
