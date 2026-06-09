@@ -9,7 +9,11 @@ import { startServer, persistDatabase } from '../backend/index';
 // Escribe logs a un archivo para depurar errores de producción
 const LOG_PATH = path.join(app.getPath('userData'), 'torque-debug.log');
 function debugLog(...args: any[]) {
-  const msg = `[${new Date().toISOString()}] ${args.map(a => typeof a === 'string' ? a : JSON.stringify(a)).join(' ')}`;
+  const msg = `[${new Date().toISOString()}] ${args.map(a => {
+    if (typeof a === 'string') return a;
+    if (a instanceof Error) return `${a.name}: ${a.message}\n${a.stack}`;
+    try { return JSON.stringify(a); } catch { return String(a); }
+  }).join(' ')}`;
   try { fs.appendFileSync(LOG_PATH, msg + '\n'); } catch {}
   console.log(msg);
 }
@@ -42,7 +46,12 @@ autoUpdater.allowPrerelease = false;
 // ── Creación de la ventana ─────────────────────────────────────────────────
 async function createWindow() {
   // Start Express server
-  await startServer(API_PORT);
+  try {
+    await startServer(API_PORT);
+  } catch (err) {
+    debugLog('Error al iniciar servidor:', err);
+    throw err;
+  }
 
   const preloadPath = path.join(app.getAppPath(), 'dist/preload/preload.js');
   const rendererPath = path.join(app.getAppPath(), 'dist/renderer/index.html');
@@ -176,6 +185,10 @@ ipcMain.handle('restart-and-update', () => {
 });
 
 // ── Arranque ────────────────────────────────────────────────────────────────
+process.on('unhandledRejection', (reason) => {
+  debugLog('UNHANDLED REJECTION:', reason);
+});
+
 app.whenReady().then(async () => {
   // Pasar explícitamente el userDataPath al backend antes de iniciar el servidor
   // Esto asegura que la base de datos se guarde en la ruta correcta incluso si
@@ -183,7 +196,11 @@ app.whenReady().then(async () => {
   (globalThis as any).__userDataPath = app.getPath('userData');
   debugLog('userDataPath:', (globalThis as any).__userDataPath);
 
-  await createWindow();
+  try {
+    await createWindow();
+  } catch (err) {
+    debugLog('Error al crear ventana:', err);
+  }
   setupAutoUpdater();
 
   // Verificar actualizaciones después de crear la ventana (solo en producción)
