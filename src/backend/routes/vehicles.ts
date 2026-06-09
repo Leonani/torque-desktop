@@ -580,6 +580,16 @@ router.put('/:id/visits/:visitId', (req: Request, res: Response) => {
         }
       }
 
+      // Recalcular total de la visita desde assigned_products y visit_services
+      const totalProductos = db.prepare(
+        'SELECT COALESCE(SUM(subtotal), 0) AS total FROM assigned_products WHERE visit_id = ?'
+      ).get(visitId) as { total: number };
+      const totalServicios = db.prepare(
+        'SELECT COALESCE(SUM(precio), 0) AS total FROM visit_services WHERE visit_id = ?'
+      ).get(visitId) as { total: number };
+      const newTotal = totalProductos.total + totalServicios.total;
+      db.prepare('UPDATE visits SET total = ? WHERE id = ?').run(newTotal, visitId);
+
       db.prepare('UPDATE vehicles SET updated_at = ? WHERE id = ?').run(now, id);
     });
 

@@ -436,6 +436,8 @@ const VehicleDetail: React.FC = () => {
     let successCount = 0;
     let failCount = 0;
 
+    const accumulatedServicios: { nombre: string; precio: number }[] = [];
+
     for (const item of pendingItems) {
       try {
         if (item.tipo === 'producto' && item.productId) {
@@ -447,11 +449,11 @@ const VehicleDetail: React.FC = () => {
           });
           successCount++;
         } else if (item.tipo === 'servicio') {
-          // Get current servicios + add new one
+          accumulatedServicios.push({ nombre: item.nombre, precio: item.precio });
           const currentServicios = visit.servicios || [];
           await updateVisitServices(id, visit._id, [
             ...currentServicios,
-            { nombre: item.nombre, precio: item.precio },
+            ...accumulatedServicios,
           ]);
           successCount++;
         }
