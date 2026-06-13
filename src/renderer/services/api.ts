@@ -180,6 +180,18 @@ export const getDebts = async () => {
   return response.data;
 };
 
+// ─── Cash Register functions ─────────────────────────────────────
+
+export const getCurrentRegister = async () => {
+  const response = await api.get('/cash-register/current');
+  return response.data;
+};
+
+export const getRegisterHistory = async () => {
+  const response = await api.get('/cash-register/history');
+  return response.data;
+};
+
 // ─── Cash Report functions ───────────────────────────────────────
 
 export const getCashReport = async (startDate: string, endDate: string) => {

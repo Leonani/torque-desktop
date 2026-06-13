@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, Typography, Row, Col, Button, Space, Image, Tag, Divider, Popconfirm, Collapse, Empty, Modal, Select, InputNumber, Input, Alert, message, Spin } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, PrinterOutlined, PlusOutlined, CalendarOutlined, WarningOutlined } from '@ant-design/icons';
@@ -12,6 +12,7 @@ import { createEmptyInspections } from '@utils/inspectionData';
 import {
   registerPago, deletePago, createNotaCredito, deleteNotaCredito,
   assignProductToVisit, removeProductFromVisit, updateVisitServices,
+  getCurrentRegister, getRegisterHistory,
 } from '@services/api';
 import type { Visit, CashRegister, PagoEntry, Product } from '@/types';
 
@@ -90,13 +91,11 @@ const VehicleDetail: React.FC = () => {
     const checkCashRegister = async () => {
       try {
         // Obtener caja actual
-        const currentRes = await fetch('/api/cash-register/current');
-        const currentData = await currentRes.json();
+        const currentData = await getCurrentRegister();
         setCashOpen(currentData && currentData.estado === 'abierta');
 
         // Obtener historial de cierres para saber qué pagos están protegidos
-        const historyRes = await fetch('/api/cash-register/history');
-        const historyData = await historyRes.json();
+        const historyData = await getRegisterHistory();
         // Solo nos interesan las cajas cerradas
         setClosedRegisters(
           (Array.isArray(historyData) ? historyData : []).filter(
@@ -160,10 +159,10 @@ const VehicleDetail: React.FC = () => {
 
   // ── Helpers para el modal multi-fila ──────────────────────
 
-  let rowIdCounter = 0;
+  const rowIdCounterRef = useRef(0);
   const generateRowId = () => {
-    rowIdCounter++;
-    return `row-${rowIdCounter}`;
+    rowIdCounterRef.current++;
+    return `row-${rowIdCounterRef.current}`;
   };
 
   const calcularTotalPagoRows = (): number => {
@@ -622,7 +621,7 @@ const VehicleDetail: React.FC = () => {
     <div style={{ padding: '24px' }}>
       <Row justify="space-between" align="middle" style={{ marginBottom: '24px' }}>
         <Col>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/vehicles')}>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
             Volver
           </Button>
         </Col>
