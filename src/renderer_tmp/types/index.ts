@@ -121,12 +121,17 @@ export interface Product {
 
 export interface StockMovement {
   _id?: string;
-  productId: Product;
+  productId: string;
+  nombreProducto: string;
+  codigoBarra?: string;
+  categoria?: string | null;
+  subcategoria?: string | null;
   tipo: 'entrada' | 'salida';
   cantidad: number;
   motivo: 'compra' | 'ajuste' | 'uso_reparacion' | 'devolucion';
   referenciaVehiculoId?: string;
   precioVentaAplicado?: number;
+  precioCompraAplicado?: number;
   createdAt?: string;
 }
 
