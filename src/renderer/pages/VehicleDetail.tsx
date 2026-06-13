@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, Typography, Row, Col, Button, Space, Image, Tag, Divider, Popconfirm, Collapse, Empty, Modal, Select, InputNumber, Input, Alert, message, Spin } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, PrinterOutlined, PlusOutlined, CalendarOutlined, WarningOutlined } from '@ant-design/icons';
@@ -159,10 +159,10 @@ const VehicleDetail: React.FC = () => {
 
   // ── Helpers para el modal multi-fila ──────────────────────
 
-  let rowIdCounter = 0;
+  const rowIdCounterRef = useRef(0);
   const generateRowId = () => {
-    rowIdCounter++;
-    return `row-${rowIdCounter}`;
+    rowIdCounterRef.current++;
+    return `row-${rowIdCounterRef.current}`;
   };
 
   const calcularTotalPagoRows = (): number => {
@@ -621,7 +621,7 @@ const VehicleDetail: React.FC = () => {
     <div style={{ padding: '24px' }}>
       <Row justify="space-between" align="middle" style={{ marginBottom: '24px' }}>
         <Col>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/vehicles')}>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
             Volver
           </Button>
         </Col>

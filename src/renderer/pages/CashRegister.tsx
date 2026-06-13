@@ -93,7 +93,7 @@ const CashRegister: React.FC = () => {
           observaciones: values.observaciones || undefined,
         }),
       ).unwrap();
-      setDetailData(result);
+      setDetailData({ register: result, resumen: result.resumen });
       setCerrarModal(false);
       cerrarForm.resetFields();
       // Refresh history after closing

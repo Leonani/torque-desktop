@@ -160,18 +160,19 @@ export function useTheme() {
 
 ### Portable Executable Naming Convention
 
-Use the `-draft` suffix for pre-release/test builds to distinguish them from production releases:
+Use the `-draft` suffix with an incremental number for pre-release/test builds:
 
 | Stage | File Name | Example |
 |-------|-----------|---------|
-| **Draft / Testing** | `Torque Desktop {version}-draft.exe` | `Torque Desktop 1.3.0-draft.exe` |
+| **Draft / Testing** | `Torque Desktop {version}-draft.{n}.exe` | `Torque Desktop 1.3.0-draft.1.exe`, `...-draft.2.exe` |
 | **Production Release** | `Torque Desktop {version}.exe` | `Torque Desktop 1.3.0.exe` |
 
 **Workflow:**
-1. During development/testing, build with `-draft` suffix (rename after `electron-builder` completes)
-2. When ready for release, remove `-draft` suffix from the filename
-3. The GitHub release should always use the production name (without `-draft`)
-4. Update the existing release assets rather than creating a new release for each draft iteration
+1. Each time you build a draft, increment the number: `-draft.1`, `-draft.2`, `-draft.3`, etc.
+2. The `release/` directory may contain multiple drafts for comparison
+3. When ready for release, remove `-draft.{n}` suffix from the filename
+4. The GitHub release should always use the production name (without `-draft`)
+5. Update the existing release assets rather than creating a new release for each draft iteration
 
 This prevents confusion between test builds and actual releases, especially when sharing the executable for testing.
 
