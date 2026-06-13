@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-06-13
+
+### Fixed
+- CashRegister crash on revisit: null safety for `montoInicial`, `montoFinalDeclarado`, `importe` in history columns
+- Cash register status showing "closed" when open in VehicleDetail: replaced `fetch()` with axios for production compatibility
+- Duplicate payment rows in multi-payment modal: `rowIdCounter` uses `useRef` instead of resetting on every render
+- CashRegister crash on close: `setDetailData` now wraps result in `{ register, resumen }` object
+- Back button in VehicleDetail always going to `/vehicles`: replaced `navigate('/vehicles')` with `navigate(-1)`
+- StockMovementsReport: Producto, Código, Categoría and Subcategoría columns showing empty data — fixed backend SQL to return product fields and frontend to use flat `dataIndex`
+- Excel export in StockMovementsReport: rebuilt with all 8 columns, auto-fit widths, and human-readable labels
+
+### Changed
+- AGENTS.md: draft naming convention now uses incremental `-draft.{n}` suffix
+
 ## [1.3.0] - 2026-06-09
 
 ### Fixed
@@ -63,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Split settings into Workshop Data and Appearance sections
 
+[1.3.1]: https://github.com/Leonani/torque-desktop/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/Leonani/torque-desktop/compare/v1.2.7...v1.3.0
 [1.2.7]: https://github.com/Leonani/torque-desktop/compare/v1.2.6...v1.2.7
 [1.2.6]: https://github.com/Leonani/torque-desktop/compare/v1.2.4...v1.2.6
