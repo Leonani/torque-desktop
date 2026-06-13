@@ -224,15 +224,19 @@ const CashRegister: React.FC = () => {
       title: 'Monto Inicial',
       dataIndex: 'montoInicial',
       key: 'montoInicial',
-      render: (monto: number) =>
-        `$${monto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`,
+      render: (monto: number | null | undefined) =>
+        monto != null ? (
+          `$${monto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
+        ) : (
+          <Text type="secondary">—</Text>
+        ),
     },
     {
       title: 'Monto Final',
       dataIndex: 'montoFinalDeclarado',
       key: 'montoFinalDeclarado',
-      render: (monto: number | undefined) =>
-        monto !== undefined ? (
+      render: (monto: number | null | undefined) =>
+        monto != null ? (
           `$${monto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
         ) : (
           <Text type="secondary">—</Text>
@@ -306,13 +310,14 @@ const CashRegister: React.FC = () => {
       key: 'importe',
       width: 150,
       align: 'right' as const,
-      render: (importe: number) => {
-        const formatted = `$${Math.abs(importe).toLocaleString('es-AR', {
+      render: (importe: number | null | undefined) => {
+        const valor = importe ?? 0;
+        const formatted = `$${Math.abs(valor).toLocaleString('es-AR', {
           minimumFractionDigits: 2,
         })}`;
         return (
-          <Text strong style={{ color: importe >= 0 ? '#52c41a' : '#cf1322' }}>
-            {importe >= 0 ? '+' : '-'}{formatted}
+          <Text strong style={{ color: valor >= 0 ? '#52c41a' : '#cf1322' }}>
+            {valor >= 0 ? '+' : '-'}{formatted}
           </Text>
         );
       },
