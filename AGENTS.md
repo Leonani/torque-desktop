@@ -156,6 +156,25 @@ export function useTheme() {
 - Use `screen.getByText()`, `fireEvent.click()`, `waitFor()` patterns from `@testing-library/react`.
 - Test files mirror page structure in `src/renderer_tmp/__tests__/pages/`.
 
+## Release & Versioning
+
+### Portable Executable Naming Convention
+
+Use the `-draft` suffix for pre-release/test builds to distinguish them from production releases:
+
+| Stage | File Name | Example |
+|-------|-----------|---------|
+| **Draft / Testing** | `Torque Desktop {version}-draft.exe` | `Torque Desktop 1.3.0-draft.exe` |
+| **Production Release** | `Torque Desktop {version}.exe` | `Torque Desktop 1.3.0.exe` |
+
+**Workflow:**
+1. During development/testing, build with `-draft` suffix (rename after `electron-builder` completes)
+2. When ready for release, remove `-draft` suffix from the filename
+3. The GitHub release should always use the production name (without `-draft`)
+4. Update the existing release assets rather than creating a new release for each draft iteration
+
+This prevents confusion between test builds and actual releases, especially when sharing the executable for testing.
+
 ## sql.js Build Fix
 
 The app uses sql.js (SQLite WASM) which has a Rollup bundling bug in ESM context.

@@ -12,6 +12,7 @@ import { createEmptyInspections } from '@utils/inspectionData';
 import {
   registerPago, deletePago, createNotaCredito, deleteNotaCredito,
   assignProductToVisit, removeProductFromVisit, updateVisitServices,
+  getCurrentRegister, getRegisterHistory,
 } from '@services/api';
 import type { Visit, CashRegister, PagoEntry, Product } from '@/types';
 
@@ -90,13 +91,11 @@ const VehicleDetail: React.FC = () => {
     const checkCashRegister = async () => {
       try {
         // Obtener caja actual
-        const currentRes = await fetch('/api/cash-register/current');
-        const currentData = await currentRes.json();
+        const currentData = await getCurrentRegister();
         setCashOpen(currentData && currentData.estado === 'abierta');
 
         // Obtener historial de cierres para saber qué pagos están protegidos
-        const historyRes = await fetch('/api/cash-register/history');
-        const historyData = await historyRes.json();
+        const historyData = await getRegisterHistory();
         // Solo nos interesan las cajas cerradas
         setClosedRegisters(
           (Array.isArray(historyData) ? historyData : []).filter(
